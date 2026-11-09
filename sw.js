@@ -1,5 +1,5 @@
-/* Instrumento diario — service worker (cache-first app shell) */
-const CACHE = 'instrumento-diario-v1';
+/* Instrumento diario — service worker v2 (network-first for HTML) */
+const CACHE = 'instrumento-diario-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -24,9 +24,36 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function isNavigationOrHtml(req) {
+  if (req.mode === 'navigate') return true;
+  const url = new URL(req.url);
+  const path = url.pathname;
+  return path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('index.html');
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
+  if (isNavigationOrHtml(req)) {
+    event.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        if (res.ok) {
+          caches.open(CACHE).then((cache) => {
+            cache.put('./index.html', copy.clone());
+            cache.put('./', copy.clone());
+            cache.put(req, copy);
+          });
+        }
+        return res;
+      }).catch(() =>
+        caches.match(req).then((cached) => cached || caches.match('./index.html'))
+      )
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;

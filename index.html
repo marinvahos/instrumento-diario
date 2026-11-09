@@ -29,6 +29,7 @@
       --switch-on: #28a745;
       --star: #ffc832;
       --btn-secondary: #eef2f8;
+      --danger: #c0392b;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-top: env(safe-area-inset-top, 0px);
       --row-h: 48px;
@@ -50,6 +51,7 @@
         --switch-off: #3a4760;
         --switch-on: #3cb371;
         --btn-secondary: #1a2740;
+        --danger: #e57373;
       }
     }
     * { box-sizing: border-box; }
@@ -95,6 +97,26 @@
       font-size: 1rem;
       font-weight: 600;
     }
+    .mode-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .mode-tabs button {
+      flex: 1;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: var(--tab-bg);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .mode-tabs button.active {
+      background: var(--tab-active);
+      color: var(--tab-active-text);
+    }
     .tabs {
       display: flex;
       gap: 6px;
@@ -124,19 +146,32 @@
       padding: 6px;
       border: 1px solid var(--border);
     }
+    .group-title {
+      margin: 6px 4px 2px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .group-title:first-child { margin-top: 2px; }
     .row {
       position: relative;
       display: flex;
       align-items: center;
       gap: 10px;
       min-height: var(--row-h);
-      height: var(--row-h);
-      padding: 0 10px;
+      height: auto;
+      padding: 6px 10px;
       border-radius: 8px;
       cursor: pointer;
       user-select: none;
       overflow: hidden;
       transition: background 0.2s ease;
+    }
+    .view-diario .row {
+      height: var(--row-h);
+      padding: 0 10px;
     }
     .row:active { opacity: 0.92; }
     .row.done {
@@ -145,6 +180,11 @@
     .row.done .label {
       text-decoration: line-through;
       color: var(--done-text);
+    }
+    .row.done .label-sub {
+      text-decoration: line-through;
+      color: var(--done-text);
+      opacity: 0.8;
     }
     .switch {
       position: relative;
@@ -169,14 +209,28 @@
       transition: transform 0.2s ease;
     }
     .row.done .switch::after { transform: translateX(18px); }
-    .label {
+    .label-wrap {
       flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .label {
       font-size: 0.82rem;
-      line-height: 1.2;
+      line-height: 1.25;
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
+    }
+    .view-diario .label {
+      -webkit-line-clamp: 2;
+    }
+    .label-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.2;
     }
     .check {
       flex-shrink: 0;
@@ -192,6 +246,20 @@
     .row.done .check {
       opacity: 1;
       transform: scale(1);
+    }
+    .btn-del {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--danger);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
     }
     .stars {
       position: absolute;
@@ -217,6 +285,33 @@
         opacity: 0;
         transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1);
       }
+    }
+    .add-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .add-row input {
+      flex: 1;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .add-row button {
+      height: 44px;
+      padding: 0 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent-2);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
     }
     .actions {
       display: flex;
@@ -248,6 +343,7 @@
       text-align: center;
       line-height: 1.35;
     }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -257,17 +353,37 @@
       <p class="meta" id="fechaHoy"></p>
       <p class="counter" id="contador">Llevas 0 de 30</p>
     </header>
-    <div class="tabs" role="tablist">
-      <button type="button" class="active" data-group="0" role="tab" aria-selected="true">1 a 10</button>
-      <button type="button" data-group="1" role="tab" aria-selected="false">11 a 20</button>
-      <button type="button" data-group="2" role="tab" aria-selected="false">21 a 30</button>
+
+    <div class="mode-tabs" role="tablist" aria-label="Vista">
+      <button type="button" class="active" id="modeDiario" data-mode="diario" role="tab" aria-selected="true">Diario</button>
+      <button type="button" id="modeBuzon" data-mode="buzon" role="tab" aria-selected="false">Buzón</button>
     </div>
-    <div class="list" id="lista" role="list"></div>
-    <div class="actions">
-      <button type="button" class="btn-export" id="btnExportar">Exportar a Excel (CSV)</button>
-      <button type="button" class="btn-reset" id="btnReiniciar">Empezar de nuevo</button>
+
+    <div id="viewDiario" class="view-diario">
+      <div class="tabs" role="tablist">
+        <button type="button" class="active" data-group="0" role="tab" aria-selected="true">1 a 10</button>
+        <button type="button" data-group="1" role="tab" aria-selected="false">11 a 20</button>
+        <button type="button" data-group="2" role="tab" aria-selected="false">21 a 30</button>
+      </div>
+      <div class="list" id="lista" role="list"></div>
+      <div class="actions">
+        <button type="button" class="btn-export" id="btnExportar">Exportar a Excel (CSV)</button>
+        <button type="button" class="btn-reset" id="btnReiniciar">Empezar de nuevo</button>
+      </div>
+      <p class="hint">Tus marcas se guardan en este celular. Un día nuevo empieza limpio solo.</p>
     </div>
-    <p class="hint">Tus marcas se guardan en este celular. Un día nuevo empieza limpio solo.</p>
+
+    <div id="viewBuzon" class="view-buzon hidden">
+      <div class="list" id="listaBuzon" role="list"></div>
+      <div class="add-row">
+        <input type="text" id="inputBuzon" maxlength="120" placeholder="Nuevo pendiente…" enterkeyhint="done" />
+        <button type="button" id="btnAgregar">Agregar</button>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn-export" id="btnExportarBuzon">Exportar buzón (CSV)</button>
+      </div>
+      <p class="hint">El buzón no se reinicia cada día. Lo que marques queda hasta que lo desmarques.</p>
+    </div>
   </div>
   <script>
 (function () {
@@ -306,8 +422,30 @@
     "Dormir"
   ];
 
+  var BUZON_SEED = [
+    { id: "b1", texto: "Propuesta para Sofía (bloque de Secretaría)", grupo: "sin_fecha", nota: "" },
+    { id: "b2", texto: "Davibank Salitre Plaza: retirar dinero (llamar antes)", grupo: "sin_fecha", nota: "" },
+    { id: "b3", texto: "Llamar al técnico de cámaras por el lente 200-500", grupo: "sin_fecha", nota: "" },
+    { id: "b4", texto: "Reunión con Estefanía: plan de trabajo (ponerle fecha)", grupo: "sin_fecha", nota: "" },
+    { id: "b5", texto: "Propuesta Jardín Botánico", grupo: "sin_fecha", nota: "" },
+    { id: "b6", texto: "Hilos Mágicos", grupo: "sin_fecha", nota: "" },
+    { id: "b7", texto: "Pagar recibos de servicios", grupo: "sin_fecha", nota: "" },
+    { id: "b8", texto: "Comprar destapacaños", grupo: "sin_fecha", nota: "" },
+    { id: "b9", texto: "Comprar jabón para la ropa", grupo: "sin_fecha", nota: "" },
+    { id: "b10", texto: "Llevar la chaqueta a la lavandería", grupo: "sin_fecha", nota: "" },
+    { id: "b11", texto: "Comprar dos pantalones", grupo: "sin_fecha", nota: "" },
+    { id: "b12", texto: "Ordenar escritorio y cuarto", grupo: "sin_fecha", nota: "" },
+    { id: "b13", texto: "Cuadrar clases de armónica con el profesor de música", grupo: "sin_fecha", nota: "" },
+    { id: "b14", texto: "Pedir en la EPS la cita de la cadera", grupo: "sin_fecha", nota: "" },
+    { id: "b15", texto: "Documento de medicina narrativa", grupo: "con_fecha", nota: "Vence esta semana" },
+    { id: "b16", texto: "Devolver libros Luis Ángel Arango", grupo: "con_fecha", nota: "Antes del 14 de noviembre" },
+    { id: "b17", texto: "Averiguar qué dijo Repuestos Mabe", grupo: "con_fecha", nota: "" }
+  ];
+
   var STORAGE_KEY = "instrumentoDiario.v1";
+  var BUZON_KEY = "instrumentoDiario.buzon.v1";
   var currentGroup = 0;
+  var currentMode = "diario";
   var audioCtx = null;
 
   function todayKey() {
@@ -365,6 +503,85 @@
     }
     store.lastDate = key;
     return key;
+  }
+
+  function defaultBuzon() {
+    return {
+      items: BUZON_SEED.map(function (s) {
+        return {
+          id: s.id,
+          texto: s.texto,
+          grupo: s.grupo,
+          nota: s.nota || "",
+          hecha: false,
+          fecha_hecho: null,
+          hora_hecho: null,
+          custom: false
+        };
+      }),
+      nextCustomId: 1
+    };
+  }
+
+  function loadBuzon() {
+    try {
+      var raw = localStorage.getItem(BUZON_KEY);
+      if (!raw) {
+        var fresh = defaultBuzon();
+        saveBuzon(fresh);
+        return fresh;
+      }
+      var data = JSON.parse(raw);
+      if (!data.items || !Array.isArray(data.items)) {
+        var reset = defaultBuzon();
+        saveBuzon(reset);
+        return reset;
+      }
+      // Ensure seed items exist (preserve done state if already present)
+      var byId = {};
+      for (var i = 0; i < data.items.length; i++) {
+        byId[data.items[i].id] = data.items[i];
+      }
+      var merged = [];
+      for (var s = 0; s < BUZON_SEED.length; s++) {
+        var seed = BUZON_SEED[s];
+        if (byId[seed.id]) {
+          var existing = byId[seed.id];
+          existing.texto = seed.texto;
+          existing.grupo = seed.grupo;
+          existing.nota = seed.nota || "";
+          existing.custom = false;
+          merged.push(existing);
+          delete byId[seed.id];
+        } else {
+          merged.push({
+            id: seed.id,
+            texto: seed.texto,
+            grupo: seed.grupo,
+            nota: seed.nota || "",
+            hecha: false,
+            fecha_hecho: null,
+            hora_hecho: null,
+            custom: false
+          });
+        }
+      }
+      // Append remaining custom items (and any unknown)
+      var leftovers = Object.keys(byId);
+      for (var L = 0; L < leftovers.length; L++) {
+        var item = byId[leftovers[L]];
+        if (item.custom) merged.push(item);
+      }
+      data.items = merged;
+      if (!data.nextCustomId) data.nextCustomId = 1;
+      return data;
+    } catch (e) {
+      return defaultBuzon();
+    }
+  }
+
+  function saveBuzon(data) {
+    localStorage.setItem(BUZON_KEY, JSON.stringify(data));
   }
 
   function getAudio() {
@@ -449,9 +666,54 @@
     return n;
   }
 
+  function countBuzonDone(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (data.items[i].hecha) n++;
+    }
+    return n;
+  }
+
+  function updateCounterForMode() {
+    var contador = document.getElementById("contador");
+    if (currentMode === "buzon") {
+      var b = loadBuzon();
+      contador.textContent = "Buzón: " + countBuzonDone(b) + " de " + b.items.length;
+    } else {
+      var store = loadStore();
+      var dateKey = ensureToday(store);
+      contador.textContent = "Llevas " + countDone(store.days[dateKey]) + " de 30";
+    }
+  }
+
   function updateCounter(store, dateKey) {
-    var n = countDone(store.days[dateKey]);
-    document.getElementById("contador").textContent = "Llevas " + n + " de 30";
+    if (currentMode !== "diario") return;
+    document.getElementById("contador").textContent = "Llevas " + countDone(store.days[dateKey]) + " de 30";
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    var diarioBtn = document.getElementById("modeDiario");
+    var buzonBtn = document.getElementById("modeBuzon");
+    var viewDiario = document.getElementById("viewDiario");
+    var viewBuzon = document.getElementById("viewBuzon");
+    var isDiario = mode === "diario";
+    diarioBtn.classList.toggle("active", isDiario);
+    buzonBtn.classList.toggle("active", !isDiario);
+    diarioBtn.setAttribute("aria-selected", isDiario ? "true" : "false");
+    buzonBtn.setAttribute("aria-selected", isDiario ? "false" : "true");
+    viewDiario.classList.toggle("hidden", !isDiario);
+    viewBuzon.classList.toggle("hidden", isDiario);
+    if (isDiario) {
+      var store = loadStore();
+      var dateKey = ensureToday(store);
+      saveStore(store);
+      renderList(store, dateKey);
+      updateCounter(store, dateKey);
+    } else {
+      renderBuzon();
+      updateCounterForMode();
+    }
   }
 
   function renderList(store, dateKey) {
@@ -508,7 +770,7 @@
     });
     saveStore(store);
 
-    var row = document.querySelector('.row[data-num="' + num + '"]');
+    var row = document.querySelector('#lista .row[data-num="' + num + '"]');
     if (row) {
       if (t.hecha) {
         row.classList.add("done");
@@ -526,7 +788,7 @@
 
   function setGroup(g) {
     currentGroup = g;
-    var buttons = document.querySelectorAll(".tabs button");
+    var buttons = document.querySelectorAll("#viewDiario .tabs button");
     for (var i = 0; i < buttons.length; i++) {
       var active = Number(buttons[i].getAttribute("data-group")) === g;
       buttons[i].classList.toggle("active", active);
@@ -536,6 +798,167 @@
     var dateKey = ensureToday(store);
     saveStore(store);
     renderList(store, dateKey);
+  }
+
+  function findBuzonItem(data, id) {
+    for (var i = 0; i < data.items.length; i++) {
+      if (data.items[i].id === id) return data.items[i];
+    }
+    return null;
+  }
+
+  function renderBuzon() {
+    var data = loadBuzon();
+    var lista = document.getElementById("listaBuzon");
+    lista.innerHTML = "";
+
+    function addGroup(title, grupo) {
+      var items = [];
+      for (var i = 0; i < data.items.length; i++) {
+        if (data.items[i].grupo === grupo) items.push(data.items[i]);
+      }
+      if (!items.length) return;
+      var titleEl = document.createElement("div");
+      titleEl.className = "group-title";
+      titleEl.textContent = title;
+      lista.appendChild(titleEl);
+
+      for (var j = 0; j < items.length; j++) {
+        lista.appendChild(makeBuzonRow(items[j], data.items.indexOf(items[j]) + 1));
+      }
+    }
+
+    addGroup("Buzón (sin fecha)", "sin_fecha");
+    addGroup("Con fecha", "con_fecha");
+    updateCounterForMode();
+  }
+
+  function makeBuzonRow(item, displayNum) {
+    var row = document.createElement("div");
+    row.className = "row" + (item.hecha ? " done" : "");
+    row.setAttribute("role", "listitem");
+    row.setAttribute("data-buzon-id", item.id);
+    row.setAttribute("aria-pressed", item.hecha ? "true" : "false");
+
+    var sw = document.createElement("div");
+    sw.className = "switch";
+    sw.setAttribute("aria-hidden", "true");
+
+    var wrap = document.createElement("div");
+    wrap.className = "label-wrap";
+
+    var label = document.createElement("div");
+    label.className = "label";
+    label.textContent = displayNum + ". " + item.texto;
+
+    wrap.appendChild(label);
+    if (item.nota) {
+      var sub = document.createElement("div");
+      sub.className = "label-sub";
+      sub.textContent = item.nota;
+      wrap.appendChild(sub);
+    } else if (item.hecha && item.fecha_hecho) {
+      var sub2 = document.createElement("div");
+      sub2.className = "label-sub";
+      sub2.textContent = "Hecho: " + item.fecha_hecho + (item.hora_hecho ? " " + item.hora_hecho : "");
+      wrap.appendChild(sub2);
+    }
+
+    var check = document.createElement("div");
+    check.className = "check";
+    check.textContent = "✓";
+
+    row.appendChild(sw);
+    row.appendChild(wrap);
+    row.appendChild(check);
+
+    if (item.custom) {
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn-del";
+      del.setAttribute("aria-label", "Eliminar pendiente");
+      del.textContent = "×";
+      del.addEventListener("click", (function (id) {
+        return function (ev) {
+          ev.stopPropagation();
+          deleteBuzonItem(id);
+        };
+      })(item.id));
+      row.appendChild(del);
+    }
+
+    row.addEventListener("click", (function (id) {
+      return function () { toggleBuzon(id); };
+    })(item.id));
+
+    return row;
+  }
+
+  function toggleBuzon(id) {
+    var data = loadBuzon();
+    var item = findBuzonItem(data, id);
+    if (!item) return;
+    var wasDone = !!item.hecha;
+    item.hecha = !wasDone;
+    if (item.hecha) {
+      item.fecha_hecho = todayKey();
+      item.hora_hecho = nowTime();
+    } else {
+      item.fecha_hecho = null;
+      item.hora_hecho = null;
+    }
+    saveBuzon(data);
+
+    var row = document.querySelector('#listaBuzon .row[data-buzon-id="' + id + '"]');
+    if (row) {
+      if (item.hecha) {
+        row.classList.add("done");
+        row.setAttribute("aria-pressed", "true");
+        burstStars(row);
+        playMark();
+      } else {
+        row.classList.remove("done");
+        row.setAttribute("aria-pressed", "false");
+        playUnmark();
+      }
+    }
+    // Re-render to refresh done timestamps / order notes
+    renderBuzon();
+  }
+
+  function addBuzonItem() {
+    var input = document.getElementById("inputBuzon");
+    var texto = (input.value || "").trim();
+    if (!texto) {
+      input.focus();
+      return;
+    }
+    var data = loadBuzon();
+    var id = "c" + data.nextCustomId;
+    data.nextCustomId += 1;
+    data.items.push({
+      id: id,
+      texto: texto,
+      grupo: "sin_fecha",
+      nota: "",
+      hecha: false,
+      fecha_hecho: null,
+      hora_hecho: null,
+      custom: true
+    });
+    saveBuzon(data);
+    input.value = "";
+    renderBuzon();
+  }
+
+  function deleteBuzonItem(id) {
+    var data = loadBuzon();
+    var item = findBuzonItem(data, id);
+    if (!item || !item.custom) return;
+    if (!confirm("¿Eliminar este pendiente?")) return;
+    data.items = data.items.filter(function (it) { return it.id !== id; });
+    saveBuzon(data);
+    renderBuzon();
   }
 
   function csvEscape(val) {
@@ -566,6 +989,22 @@
     return "\uFEFF" + lines.join("\r\n");
   }
 
+  function buildBuzonCsv(data) {
+    var lines = ["numero,texto,grupo,estado,fecha_hecho,hora_hecho"];
+    for (var i = 0; i < data.items.length; i++) {
+      var it = data.items[i];
+      lines.push([
+        csvEscape(i + 1),
+        csvEscape(it.texto),
+        csvEscape(it.grupo === "con_fecha" ? "con fecha" : "sin fecha"),
+        csvEscape(it.hecha ? "hecha" : "no hecha"),
+        csvEscape(it.fecha_hecho || ""),
+        csvEscape(it.hora_hecho || "")
+      ].join(","));
+    }
+    return "\uFEFF" + lines.join("\r\n");
+  }
+
   function exportCsv() {
     var store = loadStore();
     ensureToday(store);
@@ -579,6 +1018,26 @@
         var file = new File([blob], filename, { type: "text/csv" });
         if (navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], title: "Registro Instrumento diario" }).catch(function () {
+            downloadBlob(blob, filename);
+          });
+          return;
+        }
+      } catch (e) { /* fall through */ }
+    }
+    downloadBlob(blob, filename);
+  }
+
+  function exportBuzonCsv() {
+    var data = loadBuzon();
+    var csv = buildBuzonCsv(data);
+    var filename = "registro-buzon-" + todayKey() + ".csv";
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+
+    if (navigator.share && navigator.canShare) {
+      try {
+        var file = new File([blob], filename, { type: "text/csv" });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: "Registro Buzón" }).catch(function () {
             downloadBlob(blob, filename);
           });
           return;
@@ -625,8 +1084,10 @@
       ensureToday(store);
       saveStore(store);
       document.getElementById("fechaHoy").textContent = formatFechaES(key);
-      renderList(store, key);
-      updateCounter(store, key);
+      if (currentMode === "diario") {
+        renderList(store, key);
+        updateCounter(store, key);
+      }
     } else if (!store.days[key]) {
       ensureToday(store);
       saveStore(store);
@@ -637,11 +1098,15 @@
     var store = loadStore();
     var dateKey = ensureToday(store);
     saveStore(store);
+    loadBuzon(); // seed if needed
     document.getElementById("fechaHoy").textContent = formatFechaES(dateKey);
     updateCounter(store, dateKey);
     renderList(store, dateKey);
 
-    var buttons = document.querySelectorAll(".tabs button");
+    document.getElementById("modeDiario").addEventListener("click", function () { setMode("diario"); });
+    document.getElementById("modeBuzon").addEventListener("click", function () { setMode("buzon"); });
+
+    var buttons = document.querySelectorAll("#viewDiario .tabs button");
     for (var i = 0; i < buttons.length; i++) {
       buttons[i].addEventListener("click", (function (btn) {
         return function () {
@@ -651,13 +1116,29 @@
     }
     document.getElementById("btnExportar").addEventListener("click", exportCsv);
     document.getElementById("btnReiniciar").addEventListener("click", resetToday);
+    document.getElementById("btnExportarBuzon").addEventListener("click", exportBuzonCsv);
+    document.getElementById("btnAgregar").addEventListener("click", addBuzonItem);
+    document.getElementById("inputBuzon").addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        addBuzonItem();
+      }
+    });
 
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") refreshIfNewDay();
     });
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js").catch(function () {});
+      navigator.serviceWorker.register("./sw.js").then(function (reg) {
+        if (reg && reg.update) reg.update();
+      }).catch(function () {});
+      var refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
     }
   }
 
