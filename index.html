@@ -574,7 +574,9 @@
         };
       }),
       nextCustomId: 1,
-      hechosAbiertos: false
+      hechosAbiertos: false,
+      deletedIds: [],
+      deletedRecords: []
     };
   }
 
@@ -592,6 +594,12 @@
         saveBuzon(reset);
         return reset;
       }
+      if (!Array.isArray(data.deletedIds)) data.deletedIds = [];
+      if (!Array.isArray(data.deletedRecords)) data.deletedRecords = [];
+      var deletedSet = {};
+      for (var di = 0; di < data.deletedIds.length; di++) {
+        deletedSet[data.deletedIds[di]] = true;
+      }
       // Ensure seed items exist (preserve done state if already present)
       var byId = {};
       for (var i = 0; i < data.items.length; i++) {
@@ -600,6 +608,10 @@
       var merged = [];
       for (var s = 0; s < BUZON_SEED.length; s++) {
         var seed = BUZON_SEED[s];
+        if (deletedSet[seed.id]) {
+          if (byId[seed.id]) delete byId[seed.id];
+          continue;
+        }
         if (byId[seed.id]) {
           var existing = byId[seed.id];
           existing.texto = seed.texto;
@@ -625,6 +637,7 @@
       var leftovers = Object.keys(byId);
       for (var L = 0; L < leftovers.length; L++) {
         var item = byId[leftovers[L]];
+        if (deletedSet[item.id]) continue;
         if (item.custom) merged.push(item);
       }
       data.items = merged;
@@ -989,12 +1002,12 @@
     row.appendChild(wrap);
     row.appendChild(check);
 
-    if (item.custom && !opts.inHechos && !item.hecha) {
+    if (opts.inHechos || (item.custom && !item.hecha)) {
       var del = document.createElement("button");
       del.type = "button";
       del.className = "btn-del";
-      del.setAttribute("aria-label", "Eliminar pendiente");
-      del.textContent = "×";
+      del.setAttribute("aria-label", "Borrar pendiente");
+      del.textContent = "✕";
       del.addEventListener("click", (function (id) {
         return function (ev) {
           ev.stopPropagation();
@@ -1088,8 +1101,26 @@
   function deleteBuzonItem(id) {
     var data = loadBuzon();
     var item = findBuzonItem(data, id);
-    if (!item || !item.custom) return;
-    if (!confirm("¿Eliminar este pendiente?")) return;
+    if (!item) return;
+    if (!confirm("¿Borrar este pendiente?")) return;
+    if (!Array.isArray(data.deletedIds)) data.deletedIds = [];
+    if (!Array.isArray(data.deletedRecords)) data.deletedRecords = [];
+    var num = itemNumber(data, item);
+    data.deletedRecords.push({
+      id: item.id,
+      numero: num,
+      texto: item.texto,
+      grupo: item.grupo,
+      nota: item.nota || "",
+      fecha_hecho: item.fecha_hecho || null,
+      hora_hecho: item.hora_hecho || null,
+      fecha_borrado: todayKey(),
+      hora_borrado: nowTime(),
+      custom: !!item.custom
+    });
+    if (data.deletedIds.indexOf(item.id) === -1) {
+      data.deletedIds.push(item.id);
+    }
     data.items = data.items.filter(function (it) { return it.id !== id; });
     saveBuzon(data);
     renderBuzon();
@@ -1134,6 +1165,18 @@
         csvEscape(it.hecha ? "hecha" : "no hecha"),
         csvEscape(it.fecha_hecho || ""),
         csvEscape(it.hora_hecho || "")
+      ].join(","));
+    }
+    var borrados = data.deletedRecords || [];
+    for (var b = 0; b < borrados.length; b++) {
+      var rec = borrados[b];
+      lines.push([
+        csvEscape(rec.numero != null ? rec.numero : ""),
+        csvEscape(rec.texto || ""),
+        csvEscape(rec.grupo === "con_fecha" ? "con fecha" : "sin fecha"),
+        csvEscape("borrado"),
+        csvEscape(rec.fecha_hecho || ""),
+        csvEscape(rec.hora_hecho || "")
       ].join(","));
     }
     return "\uFEFF" + lines.join("\r\n");
