@@ -343,6 +343,60 @@
       text-align: center;
       line-height: 1.35;
     }
+
+    .hechos-section {
+      margin-top: 6px;
+      border-top: 1px dashed var(--border);
+      padding-top: 4px;
+    }
+    .hechos-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 40px;
+      padding: 6px 8px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      text-align: left;
+    }
+    .hechos-toggle:active { opacity: 0.85; }
+    .hechos-toggle .chev {
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+    }
+    .hechos-toggle.open .chev {
+      transform: rotate(90deg);
+    }
+    .hechos-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .hechos-body.collapsed {
+      display: none;
+    }
+    .row.leaving-done {
+      background: var(--done-bg);
+    }
+    .row.leaving-done .label,
+    .row.leaving-done .label-sub {
+      text-decoration: line-through;
+      color: var(--done-text);
+    }
+    .row.leaving-done .check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .row.leaving-done .switch { background: var(--switch-on); }
+    .row.leaving-done .switch::after { transform: translateX(18px); }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -382,7 +436,7 @@
       <div class="actions">
         <button type="button" class="btn-export" id="btnExportarBuzon">Exportar buzón (CSV)</button>
       </div>
-      <p class="hint">El buzón no se reinicia cada día. Lo que marques queda hasta que lo desmarques.</p>
+      <p class="hint">Al marcar un pendiente, pasa a Hechos abajo. Toca Hechos para verlo o desmarcarlo.</p>
     </div>
   </div>
   <script>
@@ -519,7 +573,8 @@
           custom: false
         };
       }),
-      nextCustomId: 1
+      nextCustomId: 1,
+      hechosAbiertos: false
     };
   }
 
@@ -574,6 +629,7 @@
       }
       data.items = merged;
       if (!data.nextCustomId) data.nextCustomId = 1;
+      if (typeof data.hechosAbiertos !== "boolean") data.hechosAbiertos = false;
       return data;
     } catch (e) {
       return defaultBuzon();
@@ -674,11 +730,23 @@
     return n;
   }
 
+  function countBuzonPending(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (!data.items[i].hecha) n++;
+    }
+    return n;
+  }
+
   function updateCounterForMode() {
     var contador = document.getElementById("contador");
     if (currentMode === "buzon") {
       var b = loadBuzon();
-      contador.textContent = "Buzón: " + countBuzonDone(b) + " de " + b.items.length;
+      var pendientes = countBuzonPending(b);
+      var hechos = countBuzonDone(b);
+      var txt = "Buzón: " + pendientes + " pendientes";
+      if (hechos > 0) txt += " · " + hechos + " hechos";
+      contador.textContent = txt;
     } else {
       var store = loadStore();
       var dateKey = ensureToday(store);
@@ -807,38 +875,87 @@
     return null;
   }
 
-  function renderBuzon() {
+  function itemNumber(data, item) {
+    for (var i = 0; i < data.items.length; i++) {
+      if (data.items[i].id === item.id) return i + 1;
+    }
+    return 0;
+  }
+
+  function renderBuzon(options) {
+    options = options || {};
+    var keepLeavingId = options.keepLeavingId || null;
     var data = loadBuzon();
     var lista = document.getElementById("listaBuzon");
     lista.innerHTML = "";
 
-    function addGroup(title, grupo) {
+    function addOpenGroup(title, grupo) {
       var items = [];
       for (var i = 0; i < data.items.length; i++) {
-        if (data.items[i].grupo === grupo) items.push(data.items[i]);
+        var it = data.items[i];
+        if (it.grupo !== grupo) continue;
+        if (it.hecha && it.id !== keepLeavingId) continue;
+        items.push(it);
       }
       if (!items.length) return;
       var titleEl = document.createElement("div");
       titleEl.className = "group-title";
       titleEl.textContent = title;
       lista.appendChild(titleEl);
-
       for (var j = 0; j < items.length; j++) {
-        lista.appendChild(makeBuzonRow(items[j], data.items.indexOf(items[j]) + 1));
+        var forceDone = items[j].id === keepLeavingId;
+        lista.appendChild(makeBuzonRow(items[j], itemNumber(data, items[j]), { forceDoneLook: forceDone }));
       }
     }
 
-    addGroup("Buzón (sin fecha)", "sin_fecha");
-    addGroup("Con fecha", "con_fecha");
+    addOpenGroup("Buzón (sin fecha)", "sin_fecha");
+    addOpenGroup("Con fecha", "con_fecha");
+
+    var hechos = [];
+    for (var h = 0; h < data.items.length; h++) {
+      if (data.items[h].hecha && data.items[h].id !== keepLeavingId) {
+        hechos.push(data.items[h]);
+      }
+    }
+
+    if (hechos.length) {
+      var section = document.createElement("div");
+      section.className = "hechos-section";
+
+      var toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "hechos-toggle" + (data.hechosAbiertos ? " open" : "");
+      toggle.setAttribute("aria-expanded", data.hechosAbiertos ? "true" : "false");
+      toggle.innerHTML = '<span>Hechos (' + hechos.length + ')</span><span class="chev">›</span>';
+      toggle.addEventListener("click", function () {
+        var d = loadBuzon();
+        d.hechosAbiertos = !d.hechosAbiertos;
+        saveBuzon(d);
+        renderBuzon();
+      });
+
+      var body = document.createElement("div");
+      body.className = "hechos-body" + (data.hechosAbiertos ? "" : " collapsed");
+      for (var k = 0; k < hechos.length; k++) {
+        body.appendChild(makeBuzonRow(hechos[k], itemNumber(data, hechos[k]), { inHechos: true }));
+      }
+
+      section.appendChild(toggle);
+      section.appendChild(body);
+      lista.appendChild(section);
+    }
+
     updateCounterForMode();
   }
 
-  function makeBuzonRow(item, displayNum) {
+  function makeBuzonRow(item, displayNum, opts) {
+    opts = opts || {};
+    var showDone = !!item.hecha || !!opts.forceDoneLook;
     var row = document.createElement("div");
-    row.className = "row" + (item.hecha ? " done" : "");
+    row.className = "row" + (showDone ? " done" : "") + (opts.forceDoneLook ? " leaving-done" : "");
     row.setAttribute("role", "listitem");
     row.setAttribute("data-buzon-id", item.id);
-    row.setAttribute("aria-pressed", item.hecha ? "true" : "false");
+    row.setAttribute("aria-pressed", showDone ? "true" : "false");
 
     var sw = document.createElement("div");
     sw.className = "switch";
@@ -850,18 +967,18 @@
     var label = document.createElement("div");
     label.className = "label";
     label.textContent = displayNum + ". " + item.texto;
-
     wrap.appendChild(label);
-    if (item.nota) {
+
+    if (opts.inHechos && item.fecha_hecho) {
+      var subDone = document.createElement("div");
+      subDone.className = "label-sub";
+      subDone.textContent = "Hecho: " + item.fecha_hecho + (item.hora_hecho ? " " + item.hora_hecho : "");
+      wrap.appendChild(subDone);
+    } else if (item.nota && !opts.inHechos) {
       var sub = document.createElement("div");
       sub.className = "label-sub";
       sub.textContent = item.nota;
       wrap.appendChild(sub);
-    } else if (item.hecha && item.fecha_hecho) {
-      var sub2 = document.createElement("div");
-      sub2.className = "label-sub";
-      sub2.textContent = "Hecho: " + item.fecha_hecho + (item.hora_hecho ? " " + item.hora_hecho : "");
-      wrap.appendChild(sub2);
     }
 
     var check = document.createElement("div");
@@ -872,7 +989,7 @@
     row.appendChild(wrap);
     row.appendChild(check);
 
-    if (item.custom) {
+    if (item.custom && !opts.inHechos && !item.hecha) {
       var del = document.createElement("button");
       del.type = "button";
       del.className = "btn-del";
@@ -894,36 +1011,53 @@
     return row;
   }
 
+  var buzonAnimTimer = null;
+
   function toggleBuzon(id) {
+    if (buzonAnimTimer) {
+      clearTimeout(buzonAnimTimer);
+      buzonAnimTimer = null;
+      renderBuzon();
+    }
+
     var data = loadBuzon();
     var item = findBuzonItem(data, id);
     if (!item) return;
     var wasDone = !!item.hecha;
+
     item.hecha = !wasDone;
     if (item.hecha) {
       item.fecha_hecho = todayKey();
       item.hora_hecho = nowTime();
-    } else {
-      item.fecha_hecho = null;
-      item.hora_hecho = null;
-    }
-    saveBuzon(data);
+      saveBuzon(data);
 
-    var row = document.querySelector('#listaBuzon .row[data-buzon-id="' + id + '"]');
-    if (row) {
-      if (item.hecha) {
-        row.classList.add("done");
+      var row = document.querySelector('#listaBuzon .row[data-buzon-id="' + id + '"]');
+      if (row) {
+        row.classList.add("done", "leaving-done");
         row.setAttribute("aria-pressed", "true");
         burstStars(row);
         playMark();
       } else {
-        row.classList.remove("done");
-        row.setAttribute("aria-pressed", "false");
-        playUnmark();
+        renderBuzon({ keepLeavingId: id });
+        row = document.querySelector('#listaBuzon .row[data-buzon-id="' + id + '"]');
+        if (row) {
+          burstStars(row);
+          playMark();
+        }
       }
+      updateCounterForMode();
+
+      buzonAnimTimer = setTimeout(function () {
+        buzonAnimTimer = null;
+        renderBuzon();
+      }, 1200);
+    } else {
+      item.fecha_hecho = null;
+      item.hora_hecho = null;
+      saveBuzon(data);
+      playUnmark();
+      renderBuzon();
     }
-    // Re-render to refresh done timestamps / order notes
-    renderBuzon();
   }
 
   function addBuzonItem() {
