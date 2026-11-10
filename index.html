@@ -444,6 +444,209 @@
     }
     .row.leaving-done .switch { background: var(--switch-on); }
     .row.leaving-done .switch::after { transform: translateX(18px); }
+    .horizon-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .horizon-tabs button {
+      flex: 1;
+      min-height: 40px;
+      padding: 4px 6px;
+      border: none;
+      border-radius: 10px;
+      background: var(--tab-bg);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.15;
+      cursor: pointer;
+    }
+    .horizon-tabs button.active {
+      background: var(--tab-active);
+      color: var(--tab-active-text);
+    }
+    .resumen {
+      margin: 0 0 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+    .meta-filtros {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin: -2px 0 8px;
+    }
+    .meta-filtros button {
+      min-width: 44px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      font-size: 1.05rem;
+      cursor: pointer;
+    }
+    .meta-filtros button.active {
+      border-color: var(--accent-2);
+      background: var(--tab-bg);
+      box-shadow: 0 0 0 2px rgba(30, 77, 156, 0.25);
+    }
+    .aviso {
+      margin: 0 0 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #fff3cd;
+      color: #6a4b00;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.3;
+      text-align: center;
+    }
+    .item-card { margin: 0; }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 3px;
+      align-items: center;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      border-radius: 999px;
+      padding: 1px 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .chip-leve { background: #fff3cd; color: #7a5b00; }
+    .chip-seria { background: #ffe0c2; color: #9a3b00; }
+    .chip-grave {
+      background: #f8d7da;
+      color: #8b121c;
+      font-size: 0.8rem;
+      padding: 2px 10px;
+    }
+    .chip-meta { background: var(--tab-bg); color: var(--text); font-weight: 700; }
+    .chip-nivel { background: var(--btn-secondary); color: var(--muted); font-weight: 700; }
+    .que-pasa {
+      margin-top: 3px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--danger);
+      line-height: 1.3;
+    }
+    .row.cons-grave { background: #fdecea; }
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 0 8px 6px 52px;
+    }
+    .btn-nivel {
+      height: 28px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--btn-secondary);
+      color: var(--text);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .editor-panel {
+      margin: 4px 4px 8px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .editor-title {
+      margin: 0 0 2px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .editor-item-name {
+      margin: 0 0 8px;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .editor-label {
+      margin: 8px 0 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .choice-row button {
+      min-height: 36px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--btn-secondary);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .choice-row button.active {
+      background: var(--tab-active);
+      color: var(--tab-active-text);
+      border-color: var(--tab-active);
+    }
+    .choice-row button[data-val="3"].active {
+      background: #8b121c;
+      border-color: #8b121c;
+    }
+    .editor-panel input[type="text"],
+    .editor-panel input[type="date"] {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .editor-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .editor-actions button {
+      flex: 1;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #editorCancelar {
+      background: var(--btn-secondary);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    #editorGuardar {
+      background: var(--accent-2);
+      color: #fff;
+    }
+    @media (prefers-color-scheme: dark) {
+      .aviso { background: #4a3b10; color: #ffe08a; }
+      .chip-leve { background: #4a3b10; color: #ffe08a; }
+      .chip-seria { background: #4a2a10; color: #ffc48a; }
+      .chip-grave { background: #4a181c; color: #ffb3b8; }
+      .row.cons-grave { background: #3a1c20; }
+    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -475,7 +678,45 @@
     </div>
 
     <div id="viewBuzon" class="view-buzon hidden">
+      <div class="horizon-tabs" role="tablist" aria-label="Horizonte">
+        <button type="button" id="vistaHoy" data-vista="hoy" role="tab" aria-selected="false">Hoy</button>
+        <button type="button" id="vistaSemana" data-vista="semana" role="tab" aria-selected="false">Esta semana</button>
+        <button type="button" id="vistaCompleto" data-vista="completo" class="active" role="tab" aria-selected="true">Buzón completo</button>
+      </div>
+      <p class="resumen" id="resumenBuzon">Hoy 0/3 · Semana 0/15 · Buzón 0</p>
+      <div class="meta-filtros" id="metaFiltros">
+        <button type="button" data-meta="dinero" aria-label="Filtrar por dinero">💰</button>
+        <button type="button" data-meta="salud" aria-label="Filtrar por salud">❤️</button>
+        <button type="button" data-meta="orden" aria-label="Filtrar por orden">🧹</button>
+      </div>
+      <p class="aviso hidden" id="buzonAviso" role="status"></p>
       <div class="list" id="listaBuzon" role="list"></div>
+      <div id="editorBuzon" class="editor-panel hidden">
+        <p class="editor-title">Editar pendiente</p>
+        <p class="editor-item-name" id="editorNombre"></p>
+        <p class="editor-label">Consecuencia si no lo hago pronto</p>
+        <div class="choice-row" id="editorConsec" role="group">
+          <button type="button" data-val="0">Ninguna</button>
+          <button type="button" data-val="1">Leve</button>
+          <button type="button" data-val="2">Seria</button>
+          <button type="button" data-val="3">⚠️ Grave</button>
+        </div>
+        <p class="editor-label">Meta</p>
+        <div class="choice-row" id="editorMeta" role="group">
+          <button type="button" data-val="dinero">💰 Dinero</button>
+          <button type="button" data-val="salud">❤️ Salud</button>
+          <button type="button" data-val="orden">🧹 Orden</button>
+          <button type="button" data-val="ninguna">Ninguna (pero toca)</button>
+        </div>
+        <label class="editor-label" for="editorQuePasa">¿Qué pasa si no lo hago?</label>
+        <input type="text" id="editorQuePasa" maxlength="160" placeholder="Un recordatorio corto…" />
+        <label class="editor-label" for="editorFecha">Fecha (opcional)</label>
+        <input type="date" id="editorFecha" />
+        <div class="editor-actions">
+          <button type="button" id="editorCancelar">Cancelar</button>
+          <button type="button" id="editorGuardar">Guardar</button>
+        </div>
+      </div>
       <div class="add-box">
         <div class="add-row">
           <input type="text" id="inputBuzon" maxlength="120" placeholder="Nuevo pendiente…" enterkeyhint="done" />
@@ -555,6 +796,10 @@
   var currentGroup = 0;
   var currentMode = "diario";
   var audioCtx = null;
+  var buzonVista = "completo";
+  var buzonMetaFiltro = "";
+  var editingId = null;
+  var avisoTimer = null;
 
   function todayKey() {
     var d = new Date();
@@ -613,10 +858,23 @@
     return key;
   }
 
+  function normalizeItem(item) {
+    if (!item) return item;
+    var n = Number(item.consecuencia);
+    if (!(n >= 0 && n <= 3)) item.consecuencia = 0;
+    else item.consecuencia = n;
+    if (item.meta !== "dinero" && item.meta !== "salud" && item.meta !== "orden" && item.meta !== "ninguna") {
+      item.meta = "";
+    }
+    if (typeof item.que_pasa !== "string") item.que_pasa = item.que_pasa ? String(item.que_pasa) : "";
+    if (item.nivel !== "hoy" && item.nivel !== "semana" && item.nivel !== "buzon") item.nivel = "buzon";
+    return item;
+  }
+
   function defaultBuzon() {
     return {
       items: BUZON_SEED.map(function (s) {
-        return {
+        return normalizeItem({
           id: s.id,
           texto: s.texto,
           grupo: s.grupo,
@@ -625,13 +883,19 @@
           fecha: null,
           fecha_hecho: null,
           hora_hecho: null,
-          custom: false
-        };
+          custom: false,
+          consecuencia: 0,
+          meta: "",
+          que_pasa: "",
+          nivel: "buzon"
+        });
       }),
       nextCustomId: 1,
       hechosAbiertos: false,
       deletedIds: [],
-      deletedRecords: []
+      deletedRecords: [],
+      vista: "completo",
+      metaFiltro: ""
     };
   }
 
@@ -701,8 +965,13 @@
         if (item.custom) merged.push(item);
       }
       data.items = merged;
+      for (var ni = 0; ni < data.items.length; ni++) {
+        normalizeItem(data.items[ni]);
+      }
       if (!data.nextCustomId) data.nextCustomId = 1;
       if (typeof data.hechosAbiertos !== "boolean") data.hechosAbiertos = false;
+      if (data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo") data.vista = "completo";
+      if (data.metaFiltro !== "dinero" && data.metaFiltro !== "salud" && data.metaFiltro !== "orden") data.metaFiltro = "";
       return data;
     } catch (e) {
       return defaultBuzon();
@@ -980,27 +1249,161 @@
     return "";
   }
 
-  function sortConFecha(items) {
+  function consecuenciaDe(item) {
+    var n = Number(item.consecuencia);
+    return (n >= 0 && n <= 3) ? n : 0;
+  }
+
+  function esUrgenteFecha(item) {
+    var st = fechaStatus(item.fecha);
+    return st === "hoy" || st === "vencido";
+  }
+
+  function comparePendientes(a, b, data, hotFirst) {
+    if (hotFirst) {
+      var ah = esUrgenteFecha(a) ? 0 : 1;
+      var bh = esUrgenteFecha(b) ? 0 : 1;
+      if (ah !== bh) return ah - bh;
+    }
+    var c = consecuenciaDe(b) - consecuenciaDe(a);
+    if (c) return c;
+    var af = validFecha(a.fecha);
+    var bf = validFecha(b.fecha);
+    if (af && bf && a.fecha !== b.fecha) return a.fecha < b.fecha ? -1 : 1;
+    if (af && !bf) return -1;
+    if (!af && bf) return 1;
+    return itemNumber(data, a) - itemNumber(data, b);
+  }
+
+  function sortPendientes(items, data, hotFirst) {
     return items.slice().sort(function (a, b) {
-      var af = validFecha(a.fecha);
-      var bf = validFecha(b.fecha);
-      if (af && bf) {
-        if (a.fecha < b.fecha) return -1;
-        if (a.fecha > b.fecha) return 1;
-        return 0;
-      }
-      if (af && !bf) return -1;
-      if (!af && bf) return 1;
-      return 0;
+      return comparePendientes(a, b, data, hotFirst);
     });
+  }
+
+  function countNivel(data, nivel) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (!data.items[i].hecha && data.items[i].nivel === nivel) n++;
+    }
+    return n;
+  }
+
+  function labelConsecuencia(n) {
+    if (n === 1) return "Leve";
+    if (n === 2) return "Seria";
+    if (n === 3) return "Grave";
+    return "ninguna";
+  }
+
+  function labelMeta(meta) {
+    if (meta === "dinero") return "Dinero";
+    if (meta === "salud") return "Salud";
+    if (meta === "orden") return "Orden";
+    if (meta === "ninguna") return "Ninguna (pero toca)";
+    return "";
+  }
+
+  function labelNivel(nivel) {
+    if (nivel === "hoy") return "Hoy";
+    if (nivel === "semana") return "Esta semana";
+    return "Buzón";
+  }
+
+  function csvConsecuencia(n) {
+    if (n === 1) return "leve";
+    if (n === 2) return "seria";
+    if (n === 3) return "grave";
+    return "ninguna";
+  }
+
+  function matchesMetaFiltro(item) {
+    if (!buzonMetaFiltro) return true;
+    return item.meta === buzonMetaFiltro;
+  }
+
+  function updateHorizonChrome(data) {
+    var vistas = ["hoy", "semana", "completo"];
+    for (var i = 0; i < vistas.length; i++) {
+      var v = vistas[i];
+      var btn = document.getElementById(v === "completo" ? "vistaCompleto" : (v === "hoy" ? "vistaHoy" : "vistaSemana"));
+      if (!btn) continue;
+      var on = buzonVista === v;
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+    }
+    var hoyN = countNivel(data, "hoy");
+    var semN = countNivel(data, "semana");
+    var tot = countBuzonPending(data);
+    document.getElementById("resumenBuzon").textContent = "Hoy " + hoyN + "/3 · Semana " + semN + "/15 · Buzón " + tot;
+    var filtros = document.getElementById("metaFiltros");
+    filtros.classList.toggle("hidden", buzonVista !== "completo");
+    var chips = filtros.querySelectorAll("button");
+    for (var c = 0; c < chips.length; c++) {
+      chips[c].classList.toggle("active", chips[c].getAttribute("data-meta") === buzonMetaFiltro);
+    }
+  }
+
+  function showAviso(msg) {
+    var el = document.getElementById("buzonAviso");
+    el.textContent = msg;
+    el.classList.remove("hidden");
+    if (avisoTimer) clearTimeout(avisoTimer);
+    avisoTimer = setTimeout(function () {
+      el.classList.add("hidden");
+      avisoTimer = null;
+    }, 5000);
+  }
+
+  function clearAviso() {
+    var el = document.getElementById("buzonAviso");
+    if (el) {
+      el.classList.add("hidden");
+      el.textContent = "";
+    }
+    if (avisoTimer) {
+      clearTimeout(avisoTimer);
+      avisoTimer = null;
+    }
+  }
+
+  function setBuzonVista(vista) {
+    buzonVista = vista;
+    var data = loadBuzon();
+    data.vista = vista;
+    saveBuzon(data);
+    closeEditor(false);
+    clearAviso();
+    renderBuzon();
+  }
+
+  function setMetaFiltro(meta) {
+    buzonMetaFiltro = (buzonMetaFiltro === meta) ? "" : meta;
+    var data = loadBuzon();
+    data.metaFiltro = buzonMetaFiltro;
+    saveBuzon(data);
+    renderBuzon();
   }
 
   function renderBuzon(options) {
     options = options || {};
     var keepLeavingId = options.keepLeavingId || null;
+    var reopenEditor = editingId;
     var data = loadBuzon();
     var lista = document.getElementById("listaBuzon");
+    var editor = document.getElementById("editorBuzon");
+    if (editor && editor.parentNode) {
+      document.getElementById("viewBuzon").appendChild(editor);
+    }
     lista.innerHTML = "";
+    updateHorizonChrome(data);
+
+    function appendItems(items) {
+      for (var j = 0; j < items.length; j++) {
+        var forceDone = items[j].id === keepLeavingId;
+        lista.appendChild(makeBuzonCard(items[j], itemNumber(data, items[j]), { forceDoneLook: forceDone }));
+      }
+    }
 
     function addOpenGroup(title, grupo) {
       var items = [];
@@ -1008,22 +1411,42 @@
         var it = data.items[i];
         if (it.grupo !== grupo) continue;
         if (it.hecha && it.id !== keepLeavingId) continue;
+        if (!matchesMetaFiltro(it) && it.id !== keepLeavingId) continue;
         items.push(it);
       }
-      if (grupo === "con_fecha") items = sortConFecha(items);
+      items = sortPendientes(items, data, true);
       if (!items.length) return;
       var titleEl = document.createElement("div");
       titleEl.className = "group-title";
       titleEl.textContent = title;
       lista.appendChild(titleEl);
-      for (var j = 0; j < items.length; j++) {
-        var forceDone = items[j].id === keepLeavingId;
-        lista.appendChild(makeBuzonRow(items[j], itemNumber(data, items[j]), { forceDoneLook: forceDone }));
-      }
+      appendItems(items);
     }
 
-    addOpenGroup("Con fecha", "con_fecha");
-    addOpenGroup("Sin fecha", "sin_fecha");
+    if (buzonVista === "completo") {
+      addOpenGroup("Con fecha", "con_fecha");
+      addOpenGroup("Sin fecha", "sin_fecha");
+    } else {
+      var nivel = buzonVista === "hoy" ? "hoy" : "semana";
+      var bucket = [];
+      for (var i = 0; i < data.items.length; i++) {
+        var it = data.items[i];
+        if (it.nivel !== nivel) continue;
+        if (it.hecha && it.id !== keepLeavingId) continue;
+        bucket.push(it);
+      }
+      bucket = sortPendientes(bucket, data, true);
+      if (!bucket.length) {
+        var empty = document.createElement("p");
+        empty.className = "hint";
+        empty.textContent = buzonVista === "hoy"
+          ? "No hay pendientes en Hoy. Mueve hasta 3 desde el Buzón completo."
+          : "No hay pendientes en Esta semana. Mueve hasta 15 desde el Buzón completo.";
+        lista.appendChild(empty);
+      } else {
+        appendItems(bucket);
+      }
+    }
 
     var hechos = [];
     for (var h = 0; h < data.items.length; h++) {
@@ -1051,7 +1474,7 @@
       var body = document.createElement("div");
       body.className = "hechos-body" + (data.hechosAbiertos ? "" : " collapsed");
       for (var k = 0; k < hechos.length; k++) {
-        body.appendChild(makeBuzonRow(hechos[k], itemNumber(data, hechos[k]), { inHechos: true }));
+        body.appendChild(makeBuzonCard(hechos[k], itemNumber(data, hechos[k]), { inHechos: true }));
       }
 
       section.appendChild(toggle);
@@ -1060,14 +1483,50 @@
     }
 
     updateCounterForMode();
+    if (reopenEditor && keepLeavingId !== reopenEditor) {
+      var still = findBuzonItem(data, reopenEditor);
+      if (still && !still.hecha) openEditor(reopenEditor, true);
+    }
+  }
+
+  function makeBuzonCard(item, displayNum, opts) {
+    opts = opts || {};
+    var card = document.createElement("div");
+    card.className = "item-card";
+    card.setAttribute("data-buzon-id", item.id);
+    var row = makeBuzonRow(item, displayNum, opts);
+    card.appendChild(row);
+    if (!opts.inHechos && !item.hecha && !opts.forceDoneLook) {
+      var actions = document.createElement("div");
+      actions.className = "row-actions";
+      function addMove(label, dest, aria) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-nivel";
+        btn.setAttribute("data-nivel-dest", dest);
+        btn.setAttribute("aria-label", aria || label);
+        btn.textContent = label;
+        btn.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          moveItemNivel(item.id, dest);
+        });
+        actions.appendChild(btn);
+      }
+      if (item.nivel !== "semana") addMove("→ Semana", "semana", "Mover a esta semana");
+      if (item.nivel !== "hoy") addMove("→ Hoy", "hoy", "Mover a Hoy");
+      if (item.nivel !== "buzon") addMove("Sacar", "buzon", "Sacar al buzón");
+      if (actions.childNodes.length) card.appendChild(actions);
+    }
+    return card;
   }
 
   function makeBuzonRow(item, displayNum, opts) {
     opts = opts || {};
     var showDone = !!item.hecha || !!opts.forceDoneLook;
     var due = (!showDone && !opts.inHechos) ? fechaStatus(item.fecha) : "";
+    var cons = consecuenciaDe(item);
     var row = document.createElement("div");
-    row.className = "row" + (showDone ? " done" : "") + (opts.forceDoneLook ? " leaving-done" : "") + (due === "hoy" ? " due-today" : "") + (due === "vencido" ? " due-past" : "");
+    row.className = "row" + (showDone ? " done" : "") + (opts.forceDoneLook ? " leaving-done" : "") + (due === "hoy" ? " due-today" : "") + (due === "vencido" ? " due-past" : "") + (cons === 3 && !showDone ? " cons-grave" : "");
     row.setAttribute("role", "listitem");
     row.setAttribute("data-buzon-id", item.id);
     row.setAttribute("aria-pressed", showDone ? "true" : "false");
@@ -1083,6 +1542,40 @@
     label.className = "label";
     label.textContent = displayNum + ". " + item.texto;
     wrap.appendChild(label);
+
+    if (!opts.inHechos && !showDone) {
+      var chips = document.createElement("div");
+      chips.className = "chip-row";
+      var hasChip = false;
+      if (cons > 0) {
+        var cchip = document.createElement("span");
+        cchip.className = "chip chip-" + (cons === 3 ? "grave" : cons === 2 ? "seria" : "leve");
+        cchip.textContent = (cons === 3 ? "⚠️ " : "") + labelConsecuencia(cons);
+        chips.appendChild(cchip);
+        hasChip = true;
+      }
+      if (item.meta === "dinero" || item.meta === "salud" || item.meta === "orden") {
+        var mchip = document.createElement("span");
+        mchip.className = "chip chip-meta";
+        mchip.textContent = (item.meta === "dinero" ? "💰 " : item.meta === "salud" ? "❤️ " : "🧹 ") + labelMeta(item.meta);
+        chips.appendChild(mchip);
+        hasChip = true;
+      } else if (item.meta === "ninguna") {
+        var nchip = document.createElement("span");
+        nchip.className = "chip chip-meta";
+        nchip.textContent = "Ninguna (pero toca)";
+        chips.appendChild(nchip);
+        hasChip = true;
+      }
+      if (buzonVista === "completo" && (item.nivel === "hoy" || item.nivel === "semana")) {
+        var vchip = document.createElement("span");
+        vchip.className = "chip chip-nivel";
+        vchip.textContent = labelNivel(item.nivel);
+        chips.appendChild(vchip);
+        hasChip = true;
+      }
+      if (hasChip) wrap.appendChild(chips);
+    }
 
     if (opts.inHechos && item.fecha_hecho) {
       var subDone = document.createElement("div");
@@ -1118,6 +1611,13 @@
       wrap.appendChild(sub);
     }
 
+    if (!opts.inHechos && item.que_pasa) {
+      var qp = document.createElement("div");
+      qp.className = "que-pasa";
+      qp.textContent = item.que_pasa;
+      wrap.appendChild(qp);
+    }
+
     var check = document.createElement("div");
     check.className = "check";
     check.textContent = "✓";
@@ -1139,6 +1639,19 @@
         };
       })(item.id));
       row.appendChild(dateBtn);
+
+      var editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "btn-date";
+      editBtn.setAttribute("aria-label", "Editar pendiente");
+      editBtn.textContent = "\u270F\uFE0F";
+      editBtn.addEventListener("click", (function (id) {
+        return function (ev) {
+          ev.stopPropagation();
+          openEditor(id);
+        };
+      })(item.id));
+      row.appendChild(editBtn);
     }
 
     if (opts.inHechos || (item.custom && !item.hecha)) {
@@ -1146,7 +1659,7 @@
       del.type = "button";
       del.className = "btn-del";
       del.setAttribute("aria-label", "Borrar pendiente");
-      del.textContent = "✕";
+      del.textContent = "\u2715";
       del.addEventListener("click", (function (id) {
         return function (ev) {
           ev.stopPropagation();
@@ -1166,6 +1679,7 @@
   var buzonAnimTimer = null;
 
   function toggleBuzon(id) {
+    if (editingId === id) return;
     if (buzonAnimTimer) {
       clearTimeout(buzonAnimTimer);
       buzonAnimTimer = null;
@@ -1198,6 +1712,7 @@
         }
       }
       updateCounterForMode();
+      updateHorizonChrome(loadBuzon());
 
       buzonAnimTimer = setTimeout(function () {
         buzonAnimTimer = null;
@@ -1210,6 +1725,93 @@
       playUnmark();
       renderBuzon();
     }
+  }
+
+  function moveItemNivel(id, dest) {
+    var data = loadBuzon();
+    var item = findBuzonItem(data, id);
+    if (!item || item.hecha) return;
+    if (item.nivel === dest) return;
+    var caps = { hoy: 3, semana: 15 };
+    if (dest === "hoy" || dest === "semana") {
+      if (countNivel(data, dest) >= caps[dest]) {
+        showAviso(dest === "hoy"
+          ? "Hoy ya tiene 3. Termina uno o sácalo primero."
+          : "Esta semana ya tiene 15. Termina uno o sácalo primero.");
+        return;
+      }
+    }
+    item.nivel = dest;
+    saveBuzon(data);
+    clearAviso();
+    renderBuzon();
+  }
+
+  function setChoiceGroup(el, val) {
+    var btns = el.querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle("active", btns[i].getAttribute("data-val") === String(val));
+    }
+    el.setAttribute("data-selected", String(val));
+  }
+
+  function openEditor(id, keepOpen) {
+    var data = loadBuzon();
+    var item = findBuzonItem(data, id);
+    if (!item || item.hecha) return;
+    if (!keepOpen && editingId === id) {
+      closeEditor(false);
+      return;
+    }
+    editingId = id;
+    var panel = document.getElementById("editorBuzon");
+    document.getElementById("editorNombre").textContent = item.texto;
+    setChoiceGroup(document.getElementById("editorConsec"), consecuenciaDe(item));
+    setChoiceGroup(document.getElementById("editorMeta"), item.meta || "");
+    document.getElementById("editorQuePasa").value = item.que_pasa || "";
+    document.getElementById("editorFecha").value = item.fecha || "";
+    panel.classList.remove("hidden");
+    var card = document.querySelector('#listaBuzon .item-card[data-buzon-id="' + id + '"]');
+    if (card && card.parentNode) {
+      card.parentNode.insertBefore(panel, card.nextSibling);
+    }
+    try { panel.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) { panel.scrollIntoView(); }
+  }
+
+  function closeEditor(andRender) {
+    editingId = null;
+    var panel = document.getElementById("editorBuzon");
+    if (panel) {
+      panel.classList.add("hidden");
+      document.getElementById("viewBuzon").appendChild(panel);
+    }
+    if (andRender) renderBuzon();
+  }
+
+  function saveEditor() {
+    if (!editingId) return;
+    var data = loadBuzon();
+    var item = findBuzonItem(data, editingId);
+    if (!item) {
+      closeEditor(true);
+      return;
+    }
+    var cons = Number(document.getElementById("editorConsec").getAttribute("data-selected") || "0");
+    if (!(cons >= 0 && cons <= 3)) cons = 0;
+    item.consecuencia = cons;
+    var meta = document.getElementById("editorMeta").getAttribute("data-selected") || "";
+    item.meta = (meta === "dinero" || meta === "salud" || meta === "orden" || meta === "ninguna") ? meta : "";
+    item.que_pasa = (document.getElementById("editorQuePasa").value || "").trim();
+    var fecha = document.getElementById("editorFecha").value || "";
+    if (fecha && validFecha(fecha)) {
+      item.fecha = fecha;
+      item.grupo = "con_fecha";
+    } else {
+      item.fecha = null;
+      item.grupo = "sin_fecha";
+    }
+    saveBuzon(data);
+    closeEditor(true);
   }
 
   function addBuzonItem() {
@@ -1225,7 +1827,7 @@
     var data = loadBuzon();
     var id = "c" + data.nextCustomId;
     data.nextCustomId += 1;
-    data.items.push({
+    data.items.push(normalizeItem({
       id: id,
       texto: texto,
       grupo: fecha ? "con_fecha" : "sin_fecha",
@@ -1234,8 +1836,12 @@
       hecha: false,
       fecha_hecho: null,
       hora_hecho: null,
-      custom: true
-    });
+      custom: true,
+      consecuencia: 0,
+      meta: "",
+      que_pasa: "",
+      nivel: "buzon"
+    }));
     saveBuzon(data);
     input.value = "";
     if (fechaInput) fechaInput.value = "";
@@ -1295,6 +1901,10 @@
       grupo: item.grupo,
       nota: item.nota || "",
       fecha: item.fecha || null,
+      nivel: item.nivel || "buzon",
+      consecuencia: consecuenciaDe(item),
+      meta: item.meta || "",
+      que_pasa: item.que_pasa || "",
       fecha_hecho: item.fecha_hecho || null,
       hora_hecho: item.hora_hecho || null,
       fecha_borrado: todayKey(),
@@ -1338,7 +1948,7 @@
   }
 
   function buildBuzonCsv(data) {
-    var lines = ["numero,texto,grupo,fecha,estado,fecha_hecho,hora_hecho"];
+    var lines = ["numero,texto,grupo,fecha,estado,fecha_hecho,hora_hecho,nivel,consecuencia,meta,que_pasa"];
     for (var i = 0; i < data.items.length; i++) {
       var it = data.items[i];
       lines.push([
@@ -1348,7 +1958,11 @@
         csvEscape(it.fecha || ""),
         csvEscape(it.hecha ? "hecha" : "no hecha"),
         csvEscape(it.fecha_hecho || ""),
-        csvEscape(it.hora_hecho || "")
+        csvEscape(it.hora_hecho || ""),
+        csvEscape(it.nivel || "buzon"),
+        csvEscape(csvConsecuencia(consecuenciaDe(it))),
+        csvEscape(it.meta || ""),
+        csvEscape(it.que_pasa || "")
       ].join(","));
     }
     var borrados = data.deletedRecords || [];
@@ -1361,7 +1975,11 @@
         csvEscape(rec.fecha || ""),
         csvEscape("borrado"),
         csvEscape(rec.fecha_hecho || ""),
-        csvEscape(rec.hora_hecho || "")
+        csvEscape(rec.hora_hecho || ""),
+        csvEscape(rec.nivel || "buzon"),
+        csvEscape(csvConsecuencia(rec.consecuencia)),
+        csvEscape(rec.meta || ""),
+        csvEscape(rec.que_pasa || "")
       ].join(","));
     }
     return "\uFEFF" + lines.join("\r\n");
@@ -1460,7 +2078,9 @@
     var store = loadStore();
     var dateKey = ensureToday(store);
     saveStore(store);
-    loadBuzon(); // seed if needed
+    var bInit = loadBuzon();
+    if (bInit.vista === "hoy" || bInit.vista === "semana" || bInit.vista === "completo") buzonVista = bInit.vista;
+    if (bInit.metaFiltro === "dinero" || bInit.metaFiltro === "salud" || bInit.metaFiltro === "orden") buzonMetaFiltro = bInit.metaFiltro;
     document.getElementById("fechaHoy").textContent = formatFechaES(dateKey);
     updateCounter(store, dateKey);
     renderList(store, dateKey);
@@ -1486,6 +2106,32 @@
         addBuzonItem();
       }
     });
+    document.getElementById("vistaHoy").addEventListener("click", function () { setBuzonVista("hoy"); });
+    document.getElementById("vistaSemana").addEventListener("click", function () { setBuzonVista("semana"); });
+    document.getElementById("vistaCompleto").addEventListener("click", function () { setBuzonVista("completo"); });
+    var filtroBtns = document.querySelectorAll("#metaFiltros button");
+    for (var f = 0; f < filtroBtns.length; f++) {
+      filtroBtns[f].addEventListener("click", (function (btn) {
+        return function () { setMetaFiltro(btn.getAttribute("data-meta")); };
+      })(filtroBtns[f]));
+    }
+    function wireChoices(id) {
+      var box = document.getElementById(id);
+      var btns = box.querySelectorAll("button");
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", (function (b) {
+          return function () {
+            var val = b.getAttribute("data-val");
+            if (id === "editorMeta" && box.getAttribute("data-selected") === val) val = "";
+            setChoiceGroup(box, val);
+          };
+        })(btns[i]));
+      }
+    }
+    wireChoices("editorConsec");
+    wireChoices("editorMeta");
+    document.getElementById("editorGuardar").addEventListener("click", saveEditor);
+    document.getElementById("editorCancelar").addEventListener("click", function () { closeEditor(false); });
 
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") refreshIfNewDay();
