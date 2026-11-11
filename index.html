@@ -345,6 +345,23 @@
       background: var(--surface);
       color: var(--text);
     }
+    .add-box .editor-datetime {
+      margin-top: 6px;
+    }
+    .add-box .editor-datetime input[type="date"],
+    .add-box .editor-datetime input[type="time"] {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 10px;
+      font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .add-box .editor-label {
+      margin-top: 8px;
+    }
     .btn-date {
       flex-shrink: 0;
       width: 28px;
@@ -820,16 +837,34 @@
           <input type="text" id="inputBuzon" maxlength="120" placeholder="Nuevo pendiente…" enterkeyhint="done" />
           <button type="button" id="btnAgregar">Agregar</button>
         </div>
-        <label class="add-date" for="inputFechaBuzon">
-          <span>Fecha (opcional)</span>
-          <input type="date" id="inputFechaBuzon" />
-        </label>
+        <div class="editor-datetime">
+          <label class="editor-label" for="inputFechaBuzon">Fecha (opcional)
+            <input type="date" id="inputFechaBuzon" />
+          </label>
+          <label class="editor-label" for="inputHoraBuzon">Hora (opcional)
+            <input type="time" id="inputHoraBuzon" />
+          </label>
+        </div>
         <p class="editor-label add-tipo-label">Tipo (opcional)</p>
         <div class="choice-row choice-tipo" id="addTipo" role="group">
           <button type="button" data-val="fuera">🚶 Fuera de la casa</button>
           <button type="button" data-val="casa">🏠 En la casa</button>
           <button type="button" data-val="computador">💻 Computador</button>
           <button type="button" data-val="telefono">📞 Teléfono</button>
+        </div>
+        <p class="editor-label">Consecuencia si no lo hago pronto</p>
+        <div class="choice-row" id="addConsec" role="group" data-selected="0">
+          <button type="button" data-val="0" class="active">Ninguna</button>
+          <button type="button" data-val="1">Leve</button>
+          <button type="button" data-val="2">Seria</button>
+          <button type="button" data-val="3">⚠️ Grave</button>
+        </div>
+        <p class="editor-label">Meta</p>
+        <div class="choice-row" id="addMeta" role="group">
+          <button type="button" data-val="dinero">💰 Dinero</button>
+          <button type="button" data-val="salud">❤️ Salud</button>
+          <button type="button" data-val="orden">🧹 Orden</button>
+          <button type="button" data-val="ninguna">Ninguna (pero toca)</button>
         </div>
       </div>
       <input type="date" id="inputFechaItem" class="fecha-picker-hidden" tabindex="-1" aria-hidden="true" />
@@ -2241,9 +2276,17 @@
     }
     var fecha = (fechaInput && fechaInput.value) ? fechaInput.value : "";
     if (fecha && !validFecha(fecha)) fecha = "";
+    var horaInput = document.getElementById("inputHoraBuzon");
+    var hora = normalizeHora(horaInput && horaInput.value);
     var addTipo = document.getElementById("addTipo");
     var tipo = (addTipo && addTipo.getAttribute("data-selected")) || "";
     if (!tipoValido(tipo)) tipo = "";
+    var addConsec = document.getElementById("addConsec");
+    var cons = Number((addConsec && addConsec.getAttribute("data-selected")) || "0");
+    if (!(cons >= 0 && cons <= 3)) cons = 0;
+    var addMeta = document.getElementById("addMeta");
+    var meta = (addMeta && addMeta.getAttribute("data-selected")) || "";
+    if (meta !== "dinero" && meta !== "salud" && meta !== "orden" && meta !== "ninguna") meta = "";
     var data = loadBuzon();
     var id = "c" + data.nextCustomId;
     data.nextCustomId += 1;
@@ -2253,13 +2296,13 @@
       grupo: fecha ? "con_fecha" : "sin_fecha",
       nota: "",
       fecha: fecha || null,
-      hora: null,
+      hora: hora,
       hecha: false,
       fecha_hecho: null,
       hora_hecho: null,
       custom: true,
-      consecuencia: 0,
-      meta: "",
+      consecuencia: cons,
+      meta: meta,
       tipo: tipo,
       que_pasa: "",
       nivel: "buzon"
@@ -2267,7 +2310,10 @@
     saveBuzon(data);
     input.value = "";
     if (fechaInput) fechaInput.value = "";
+    if (horaInput) horaInput.value = "";
     if (addTipo) setChoiceGroup(addTipo, "");
+    if (addConsec) setChoiceGroup(addConsec, "0");
+    if (addMeta) setChoiceGroup(addMeta, "");
     renderBuzon();
   }
 
@@ -2569,6 +2615,8 @@
     wireChoices("editorTipo", true);
     wireChoices("editorMeta", true);
     wireChoices("addTipo", true);
+    wireChoices("addConsec", false);
+    wireChoices("addMeta", true);
     document.getElementById("editorGuardar").addEventListener("click", saveEditor);
     document.getElementById("editorCancelar").addEventListener("click", function () { closeEditor(false); });
 
