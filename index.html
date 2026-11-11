@@ -524,6 +524,13 @@
       background: var(--tab-bg);
       box-shadow: 0 0 0 2px rgba(30, 77, 156, 0.25);
     }
+    .tipo-filtros {
+      margin-top: 0;
+    }
+    .chip-tipo { background: #e8eef8; color: var(--text); font-weight: 700; }
+    .add-tipo-label {
+      margin: 8px 0 4px;
+    }
     .aviso {
       margin: 0 0 8px;
       padding: 8px 10px;
@@ -637,6 +644,24 @@
       background: #8b121c;
       border-color: #8b121c;
     }
+    .choice-row.choice-tipo {
+      flex-wrap: nowrap;
+      gap: 4px;
+    }
+    .choice-row.choice-tipo button {
+      flex: 1;
+      min-width: 0;
+      min-height: 58px;
+      padding: 6px 2px;
+      font-size: 0.68rem;
+      line-height: 1.15;
+      white-space: normal;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
     .editor-panel input[type="text"],
     .editor-panel input[type="date"],
     .editor-panel input[type="time"] {
@@ -689,6 +714,7 @@
       .chip-seria { background: #4a2a10; color: #ffc48a; }
       .chip-grave { background: #4a181c; color: #ffb3b8; }
       .row.cons-grave { background: #3a1c20; }
+      .chip-tipo { background: #2a3348; color: var(--text); }
     }
     .hidden { display: none !important; }
   </style>
@@ -733,11 +759,24 @@
         <button type="button" data-meta="salud" aria-label="Filtrar por salud">❤️</button>
         <button type="button" data-meta="orden" aria-label="Filtrar por orden">🧹</button>
       </div>
+      <div class="meta-filtros tipo-filtros" id="tipoFiltros">
+        <button type="button" data-tipo="fuera" aria-label="Filtrar por fuera de la casa">🚶</button>
+        <button type="button" data-tipo="casa" aria-label="Filtrar por en la casa">🏠</button>
+        <button type="button" data-tipo="computador" aria-label="Filtrar por computador">💻</button>
+        <button type="button" data-tipo="telefono" aria-label="Filtrar por teléfono">📞</button>
+      </div>
       <p class="aviso hidden" id="buzonAviso" role="status"></p>
       <div class="list" id="listaBuzon" role="list"></div>
       <div id="editorBuzon" class="editor-panel hidden">
         <p class="editor-title">Editar pendiente</p>
         <p class="editor-item-name" id="editorNombre"></p>
+        <p class="editor-label">Tipo (opcional)</p>
+        <div class="choice-row choice-tipo" id="editorTipo" role="group">
+          <button type="button" data-val="fuera">🚶 Fuera de la casa</button>
+          <button type="button" data-val="casa">🏠 En la casa</button>
+          <button type="button" data-val="computador">💻 Computador</button>
+          <button type="button" data-val="telefono">📞 Teléfono</button>
+        </div>
         <p class="editor-label">Consecuencia si no lo hago pronto</p>
         <div class="choice-row" id="editorConsec" role="group">
           <button type="button" data-val="0">Ninguna</button>
@@ -776,6 +815,13 @@
           <span>Fecha (opcional)</span>
           <input type="date" id="inputFechaBuzon" />
         </label>
+        <p class="editor-label add-tipo-label">Tipo (opcional)</p>
+        <div class="choice-row choice-tipo" id="addTipo" role="group">
+          <button type="button" data-val="fuera">🚶 Fuera de la casa</button>
+          <button type="button" data-val="casa">🏠 En la casa</button>
+          <button type="button" data-val="computador">💻 Computador</button>
+          <button type="button" data-val="telefono">📞 Teléfono</button>
+        </div>
       </div>
       <input type="date" id="inputFechaItem" class="fecha-picker-hidden" tabindex="-1" aria-hidden="true" />
       <div class="actions">
@@ -848,6 +894,7 @@
   var audioCtx = null;
   var buzonVista = "completo";
   var buzonMetaFiltro = "";
+  var buzonTipoFiltro = "";
   var editingId = null;
   var avisoTimer = null;
 
@@ -942,6 +989,10 @@
     return key;
   }
 
+  function tipoValido(tipo) {
+    return tipo === "fuera" || tipo === "casa" || tipo === "computador" || tipo === "telefono";
+  }
+
   function normalizeItem(item) {
     if (!item) return item;
     var n = Number(item.consecuencia);
@@ -949,6 +1000,9 @@
     else item.consecuencia = n;
     if (item.meta !== "dinero" && item.meta !== "salud" && item.meta !== "orden" && item.meta !== "ninguna") {
       item.meta = "";
+    }
+    if (!tipoValido(item.tipo)) {
+      item.tipo = "";
     }
     if (typeof item.que_pasa !== "string") item.que_pasa = item.que_pasa ? String(item.que_pasa) : "";
     if (item.nivel !== "hoy" && item.nivel !== "semana" && item.nivel !== "buzon") item.nivel = "buzon";
@@ -971,6 +1025,7 @@
           custom: false,
           consecuencia: 0,
           meta: "",
+          tipo: "",
           que_pasa: "",
           nivel: "buzon"
         });
@@ -980,7 +1035,8 @@
       deletedIds: [],
       deletedRecords: [],
       vista: "completo",
-      metaFiltro: ""
+      metaFiltro: "",
+      tipoFiltro: ""
     };
   }
 
@@ -1057,6 +1113,7 @@
       if (typeof data.hechosAbiertos !== "boolean") data.hechosAbiertos = false;
       if (data.vista !== "agenda" && data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo") data.vista = "completo";
       if (data.metaFiltro !== "dinero" && data.metaFiltro !== "salud" && data.metaFiltro !== "orden") data.metaFiltro = "";
+      if (!tipoValido(data.tipoFiltro)) data.tipoFiltro = "";
       return data;
     } catch (e) {
       return defaultBuzon();
@@ -1446,6 +1503,22 @@
     return "";
   }
 
+  function labelTipo(tipo) {
+    if (tipo === "fuera") return "Fuera de la casa";
+    if (tipo === "casa") return "En la casa";
+    if (tipo === "computador") return "Computador";
+    if (tipo === "telefono") return "Teléfono";
+    return "";
+  }
+
+  function iconTipo(tipo) {
+    if (tipo === "fuera") return "🚶";
+    if (tipo === "casa") return "🏠";
+    if (tipo === "computador") return "💻";
+    if (tipo === "telefono") return "📞";
+    return "";
+  }
+
   function labelNivel(nivel) {
     if (nivel === "hoy") return "Hoy";
     if (nivel === "semana") return "Esta semana";
@@ -1462,6 +1535,15 @@
   function matchesMetaFiltro(item) {
     if (!buzonMetaFiltro) return true;
     return item.meta === buzonMetaFiltro;
+  }
+
+  function matchesTipoFiltro(item) {
+    if (!buzonTipoFiltro) return true;
+    return item.tipo === buzonTipoFiltro;
+  }
+
+  function matchesFiltros(item) {
+    return matchesMetaFiltro(item) && matchesTipoFiltro(item);
   }
 
   function updateHorizonChrome(data) {
@@ -1488,6 +1570,12 @@
     var chips = filtros.querySelectorAll("button");
     for (var c = 0; c < chips.length; c++) {
       chips[c].classList.toggle("active", chips[c].getAttribute("data-meta") === buzonMetaFiltro);
+    }
+    var tipoFiltros = document.getElementById("tipoFiltros");
+    tipoFiltros.classList.toggle("hidden", buzonVista !== "completo" && buzonVista !== "agenda");
+    var tchips = tipoFiltros.querySelectorAll("button");
+    for (var t = 0; t < tchips.length; t++) {
+      tchips[t].classList.toggle("active", tchips[t].getAttribute("data-tipo") === buzonTipoFiltro);
     }
   }
 
@@ -1528,6 +1616,14 @@
     buzonMetaFiltro = (buzonMetaFiltro === meta) ? "" : meta;
     var data = loadBuzon();
     data.metaFiltro = buzonMetaFiltro;
+    saveBuzon(data);
+    renderBuzon();
+  }
+
+  function setTipoFiltro(tipo) {
+    buzonTipoFiltro = (buzonTipoFiltro === tipo) ? "" : tipo;
+    var data = loadBuzon();
+    data.tipoFiltro = buzonTipoFiltro;
     saveBuzon(data);
     renderBuzon();
   }
@@ -1636,7 +1732,7 @@
         var it = data.items[i];
         if (it.grupo !== grupo) continue;
         if (it.hecha && it.id !== keepLeavingId) continue;
-        if (!matchesMetaFiltro(it) && it.id !== keepLeavingId) continue;
+        if (!matchesFiltros(it) && it.id !== keepLeavingId) continue;
         items.push(it);
       }
       if (!items.length) return;
@@ -1664,6 +1760,7 @@
         var ag = data.items[ai];
         if (ag.hecha && ag.id !== keepLeavingId) continue;
         if (!validFecha(ag.fecha) && ag.id !== keepLeavingId) continue;
+        if (!matchesFiltros(ag) && ag.id !== keepLeavingId) continue;
         if (validFecha(ag.fecha) || ag.id === keepLeavingId) agItems.push(ag);
       }
       var had = appendAgendaBlocks(agItems);
@@ -1809,6 +1906,13 @@
         cchip.className = "chip chip-" + (cons === 3 ? "grave" : cons === 2 ? "seria" : "leve");
         cchip.textContent = (cons === 3 ? "⚠️ " : "") + labelConsecuencia(cons);
         chips.appendChild(cchip);
+        hasChip = true;
+      }
+      if (tipoValido(item.tipo)) {
+        var tchip = document.createElement("span");
+        tchip.className = "chip chip-tipo";
+        tchip.textContent = iconTipo(item.tipo) + " " + labelTipo(item.tipo);
+        chips.appendChild(tchip);
         hasChip = true;
       }
       if (item.meta === "dinero" || item.meta === "salud" || item.meta === "orden") {
@@ -2026,6 +2130,7 @@
     var panel = document.getElementById("editorBuzon");
     document.getElementById("editorNombre").textContent = item.texto;
     setChoiceGroup(document.getElementById("editorConsec"), consecuenciaDe(item));
+    setChoiceGroup(document.getElementById("editorTipo"), item.tipo || "");
     setChoiceGroup(document.getElementById("editorMeta"), item.meta || "");
     document.getElementById("editorQuePasa").value = item.que_pasa || "";
     document.getElementById("editorFecha").value = item.fecha || "";
@@ -2059,6 +2164,8 @@
     var cons = Number(document.getElementById("editorConsec").getAttribute("data-selected") || "0");
     if (!(cons >= 0 && cons <= 3)) cons = 0;
     item.consecuencia = cons;
+    var tipo = document.getElementById("editorTipo").getAttribute("data-selected") || "";
+    item.tipo = tipoValido(tipo) ? tipo : "";
     var meta = document.getElementById("editorMeta").getAttribute("data-selected") || "";
     item.meta = (meta === "dinero" || meta === "salud" || meta === "orden" || meta === "ninguna") ? meta : "";
     item.que_pasa = (document.getElementById("editorQuePasa").value || "").trim();
@@ -2086,6 +2193,9 @@
     }
     var fecha = (fechaInput && fechaInput.value) ? fechaInput.value : "";
     if (fecha && !validFecha(fecha)) fecha = "";
+    var addTipo = document.getElementById("addTipo");
+    var tipo = (addTipo && addTipo.getAttribute("data-selected")) || "";
+    if (!tipoValido(tipo)) tipo = "";
     var data = loadBuzon();
     var id = "c" + data.nextCustomId;
     data.nextCustomId += 1;
@@ -2102,12 +2212,14 @@
       custom: true,
       consecuencia: 0,
       meta: "",
+      tipo: tipo,
       que_pasa: "",
       nivel: "buzon"
     }));
     saveBuzon(data);
     input.value = "";
     if (fechaInput) fechaInput.value = "";
+    if (addTipo) setChoiceGroup(addTipo, "");
     renderBuzon();
   }
 
@@ -2168,6 +2280,7 @@
       nivel: item.nivel || "buzon",
       consecuencia: consecuenciaDe(item),
       meta: item.meta || "",
+      tipo: item.tipo || "",
       que_pasa: item.que_pasa || "",
       fecha_hecho: item.fecha_hecho || null,
       hora_hecho: item.hora_hecho || null,
@@ -2212,7 +2325,7 @@
   }
 
   function buildBuzonCsv(data) {
-    var lines = ["numero,texto,grupo,fecha,hora,estado,fecha_hecho,hora_hecho,nivel,consecuencia,meta,que_pasa"];
+    var lines = ["numero,texto,grupo,fecha,hora,estado,fecha_hecho,hora_hecho,nivel,consecuencia,meta,tipo,que_pasa"];
     for (var i = 0; i < data.items.length; i++) {
       var it = data.items[i];
       lines.push([
@@ -2227,6 +2340,7 @@
         csvEscape(it.nivel || "buzon"),
         csvEscape(csvConsecuencia(consecuenciaDe(it))),
         csvEscape(it.meta || ""),
+        csvEscape(it.tipo || ""),
         csvEscape(it.que_pasa || "")
       ].join(","));
     }
@@ -2245,6 +2359,7 @@
         csvEscape(rec.nivel || "buzon"),
         csvEscape(csvConsecuencia(rec.consecuencia)),
         csvEscape(rec.meta || ""),
+        csvEscape(rec.tipo || ""),
         csvEscape(rec.que_pasa || "")
       ].join(","));
     }
@@ -2347,6 +2462,7 @@
     var bInit = loadBuzon();
     if (bInit.vista === "agenda" || bInit.vista === "hoy" || bInit.vista === "semana" || bInit.vista === "completo") buzonVista = bInit.vista;
     if (bInit.metaFiltro === "dinero" || bInit.metaFiltro === "salud" || bInit.metaFiltro === "orden") buzonMetaFiltro = bInit.metaFiltro;
+    if (tipoValido(bInit.tipoFiltro)) buzonTipoFiltro = bInit.tipoFiltro;
     document.getElementById("fechaHoy").textContent = formatFechaES(dateKey);
     updateCounter(store, dateKey);
     renderList(store, dateKey);
@@ -2382,21 +2498,29 @@
         return function () { setMetaFiltro(btn.getAttribute("data-meta")); };
       })(filtroBtns[f]));
     }
-    function wireChoices(id) {
+    var tipoFiltroBtns = document.querySelectorAll("#tipoFiltros button");
+    for (var tf = 0; tf < tipoFiltroBtns.length; tf++) {
+      tipoFiltroBtns[tf].addEventListener("click", (function (btn) {
+        return function () { setTipoFiltro(btn.getAttribute("data-tipo")); };
+      })(tipoFiltroBtns[tf]));
+    }
+    function wireChoices(id, canClear) {
       var box = document.getElementById(id);
       var btns = box.querySelectorAll("button");
       for (var i = 0; i < btns.length; i++) {
         btns[i].addEventListener("click", (function (b) {
           return function () {
             var val = b.getAttribute("data-val");
-            if (id === "editorMeta" && box.getAttribute("data-selected") === val) val = "";
+            if (canClear && box.getAttribute("data-selected") === val) val = "";
             setChoiceGroup(box, val);
           };
         })(btns[i]));
       }
     }
-    wireChoices("editorConsec");
-    wireChoices("editorMeta");
+    wireChoices("editorConsec", false);
+    wireChoices("editorTipo", true);
+    wireChoices("editorMeta", true);
+    wireChoices("addTipo", true);
     document.getElementById("editorGuardar").addEventListener("click", saveEditor);
     document.getElementById("editorCancelar").addEventListener("click", function () { closeEditor(false); });
 
