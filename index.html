@@ -452,12 +452,12 @@
     .horizon-tabs button {
       flex: 1;
       min-height: 40px;
-      padding: 4px 6px;
+      padding: 4px 4px;
       border: none;
       border-radius: 10px;
       background: var(--tab-bg);
       color: var(--text);
-      font-size: 0.78rem;
+      font-size: 0.7rem;
       font-weight: 700;
       line-height: 1.15;
       cursor: pointer;
@@ -465,6 +465,37 @@
     .horizon-tabs button.active {
       background: var(--tab-active);
       color: var(--tab-active-text);
+    }
+    .day-title {
+      margin: 8px 4px 4px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.01em;
+      line-height: 1.25;
+    }
+    .day-title.vencidos {
+      color: var(--danger);
+    }
+    .day-title.day-sub {
+      margin-top: 4px;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .section-title {
+      margin: 10px 4px 4px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.25;
+    }
+    .sin-fecha-note {
+      margin: 10px 4px 4px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
     }
     .resumen {
       margin: 0 0 8px;
@@ -607,7 +638,8 @@
       border-color: #8b121c;
     }
     .editor-panel input[type="text"],
-    .editor-panel input[type="date"] {
+    .editor-panel input[type="date"],
+    .editor-panel input[type="time"] {
       width: 100%;
       height: 44px;
       border: 1px solid var(--border);
@@ -616,6 +648,17 @@
       font-size: 0.95rem;
       background: var(--bg);
       color: var(--text);
+    }
+    .editor-datetime {
+      display: flex;
+      gap: 8px;
+    }
+    .editor-datetime label {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     .editor-actions {
       display: flex;
@@ -679,11 +722,12 @@
 
     <div id="viewBuzon" class="view-buzon hidden">
       <div class="horizon-tabs" role="tablist" aria-label="Horizonte">
+        <button type="button" id="vistaAgenda" data-vista="agenda" role="tab" aria-selected="false">Agenda</button>
         <button type="button" id="vistaHoy" data-vista="hoy" role="tab" aria-selected="false">Hoy</button>
         <button type="button" id="vistaSemana" data-vista="semana" role="tab" aria-selected="false">Esta semana</button>
         <button type="button" id="vistaCompleto" data-vista="completo" class="active" role="tab" aria-selected="true">Buzón completo</button>
       </div>
-      <p class="resumen" id="resumenBuzon">Hoy 0/3 · Semana 0/15 · Buzón 0</p>
+      <p class="resumen" id="resumenBuzon">Agenda 0 · Hoy 0/3 · Semana 0/15 · Buzón 0</p>
       <div class="meta-filtros" id="metaFiltros">
         <button type="button" data-meta="dinero" aria-label="Filtrar por dinero">💰</button>
         <button type="button" data-meta="salud" aria-label="Filtrar por salud">❤️</button>
@@ -710,8 +754,14 @@
         </div>
         <label class="editor-label" for="editorQuePasa">¿Qué pasa si no lo hago?</label>
         <input type="text" id="editorQuePasa" maxlength="160" placeholder="Un recordatorio corto…" />
-        <label class="editor-label" for="editorFecha">Fecha (opcional)</label>
-        <input type="date" id="editorFecha" />
+        <div class="editor-datetime">
+          <label class="editor-label" for="editorFecha">Fecha (opcional)
+            <input type="date" id="editorFecha" />
+          </label>
+          <label class="editor-label" for="editorHora">Hora (opcional)
+            <input type="time" id="editorHora" />
+          </label>
+        </div>
         <div class="editor-actions">
           <button type="button" id="editorCancelar">Cancelar</button>
           <button type="button" id="editorGuardar">Guardar</button>
@@ -830,6 +880,24 @@
     return p.hour + ":" + p.minute;
   }
 
+  function validHora(h) {
+    if (typeof h !== "string") return false;
+    var m = h.match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return false;
+    var hh = Number(m[1]);
+    var mm = Number(m[2]);
+    return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
+  }
+
+  function normalizeHora(h) {
+    if (h == null || h === "") return null;
+    var s = String(h);
+    var m = s.match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return null;
+    var v = String(Number(m[1])).padStart(2, "0") + ":" + m[2];
+    return validHora(v) ? v : null;
+  }
+
   function formatFechaES(iso) {
     var parts = iso.split("-");
     var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
@@ -884,6 +952,7 @@
     }
     if (typeof item.que_pasa !== "string") item.que_pasa = item.que_pasa ? String(item.que_pasa) : "";
     if (item.nivel !== "hoy" && item.nivel !== "semana" && item.nivel !== "buzon") item.nivel = "buzon";
+    item.hora = normalizeHora(item.hora);
     return item;
   }
 
@@ -986,7 +1055,7 @@
       }
       if (!data.nextCustomId) data.nextCustomId = 1;
       if (typeof data.hechosAbiertos !== "boolean") data.hechosAbiertos = false;
-      if (data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo") data.vista = "completo";
+      if (data.vista !== "agenda" && data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo") data.vista = "completo";
       if (data.metaFiltro !== "dinero" && data.metaFiltro !== "salud" && data.metaFiltro !== "orden") data.metaFiltro = "";
       return data;
     } catch (e) {
@@ -1265,6 +1334,47 @@
     return "";
   }
 
+  function isoAddDays(iso, n) {
+    var p = iso.split("-");
+    var d = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + n));
+    return d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0") + "-" + String(d.getUTCDate()).padStart(2, "0");
+  }
+
+  function isoWeekdayMon1(iso) {
+    var p = iso.split("-");
+    var d = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2])));
+    var w = d.getUTCDay();
+    return w === 0 ? 7 : w;
+  }
+
+  function isoEndOfWeek(iso) {
+    return isoAddDays(iso, 7 - isoWeekdayMon1(iso));
+  }
+
+  function formatDiaAgenda(iso) {
+    if (!validFecha(iso)) return iso;
+    var parts = iso.split("-");
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    try {
+      var wd = d.toLocaleDateString("es-CO", { weekday: "long" }).replace(".", "").toLowerCase();
+      var mo = d.toLocaleDateString("es-CO", { month: "short" }).replace(".", "").toLowerCase();
+      return wd + " " + d.getDate() + " " + mo;
+    } catch (e) {
+      return iso;
+    }
+  }
+
+  function compareEnDia(a, b, data) {
+    var ah = validHora(a.hora);
+    var bh = validHora(b.hora);
+    if (ah && bh && a.hora !== b.hora) return a.hora < b.hora ? -1 : 1;
+    if (ah && !bh) return -1;
+    if (!ah && bh) return 1;
+    var c = consecuenciaDe(b) - consecuenciaDe(a);
+    if (c) return c;
+    return itemNumber(data, a) - itemNumber(data, b);
+  }
+
   function consecuenciaDe(item) {
     var n = Number(item.consecuencia);
     return (n >= 0 && n <= 3) ? n : 0;
@@ -1305,6 +1415,22 @@
     return n;
   }
 
+  function countAgenda(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (!data.items[i].hecha && validFecha(data.items[i].fecha)) n++;
+    }
+    return n;
+  }
+
+  function countSinFecha(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (!data.items[i].hecha && !validFecha(data.items[i].fecha)) n++;
+    }
+    return n;
+  }
+
   function labelConsecuencia(n) {
     if (n === 1) return "Leve";
     if (n === 2) return "Seria";
@@ -1339,19 +1465,24 @@
   }
 
   function updateHorizonChrome(data) {
-    var vistas = ["hoy", "semana", "completo"];
+    var vistas = [
+      ["agenda", "vistaAgenda"],
+      ["hoy", "vistaHoy"],
+      ["semana", "vistaSemana"],
+      ["completo", "vistaCompleto"]
+    ];
     for (var i = 0; i < vistas.length; i++) {
-      var v = vistas[i];
-      var btn = document.getElementById(v === "completo" ? "vistaCompleto" : (v === "hoy" ? "vistaHoy" : "vistaSemana"));
+      var btn = document.getElementById(vistas[i][1]);
       if (!btn) continue;
-      var on = buzonVista === v;
+      var on = buzonVista === vistas[i][0];
       btn.classList.toggle("active", on);
       btn.setAttribute("aria-selected", on ? "true" : "false");
     }
     var hoyN = countNivel(data, "hoy");
     var semN = countNivel(data, "semana");
     var tot = countBuzonPending(data);
-    document.getElementById("resumenBuzon").textContent = "Hoy " + hoyN + "/3 · Semana " + semN + "/15 · Buzón " + tot;
+    var agN = countAgenda(data);
+    document.getElementById("resumenBuzon").textContent = "Agenda " + agN + " · Hoy " + hoyN + "/3 · Semana " + semN + "/15 · Buzón " + tot;
     var filtros = document.getElementById("metaFiltros");
     filtros.classList.toggle("hidden", buzonVista !== "completo");
     var chips = filtros.querySelectorAll("button");
@@ -1421,6 +1552,84 @@
       }
     }
 
+    function appendDayTitle(title, extraClass) {
+      var el = document.createElement("div");
+      el.className = "day-title" + (extraClass ? " " + extraClass : "");
+      el.textContent = title;
+      lista.appendChild(el);
+    }
+
+    function appendDayItems(fecha) {
+      var list = daysMap[fecha].slice().sort(function (a, b) {
+        return compareEnDia(a, b, data);
+      });
+      appendItems(list);
+    }
+
+    var daysMap = {};
+    function addToDay(item) {
+      var f = item.fecha;
+      if (!daysMap[f]) daysMap[f] = [];
+      daysMap[f].push(item);
+    }
+
+    function appendAgendaBlocks(items) {
+      daysMap = {};
+      var sinDia = [];
+      for (var i = 0; i < items.length; i++) {
+        if (validFecha(items[i].fecha)) addToDay(items[i]);
+        else sinDia.push(items[i]);
+      }
+      var fechas = [];
+      for (var k in daysMap) {
+        if (Object.prototype.hasOwnProperty.call(daysMap, k)) fechas.push(k);
+      }
+      fechas.sort();
+      var today = todayKey();
+      var manana = isoAddDays(today, 1);
+      var weekEnd = isoEndOfWeek(today);
+      var overdue = [];
+      var semana = [];
+      var proximas = [];
+      for (var f = 0; f < fechas.length; f++) {
+        var day = fechas[f];
+        if (day < today) overdue.push(day);
+        else if (day === today || day === manana) continue;
+        else if (day <= weekEnd) semana.push(day);
+        else proximas.push(day);
+      }
+      if (overdue.length) {
+        appendDayTitle("Vencidos", "vencidos");
+        for (var o = 0; o < overdue.length; o++) {
+          appendDayTitle(formatDiaAgenda(overdue[o]), "day-sub");
+          appendDayItems(overdue[o]);
+        }
+      }
+      if (daysMap[today]) {
+        appendDayTitle("Hoy · " + formatDiaAgenda(today));
+        appendDayItems(today);
+      }
+      if (daysMap[manana]) {
+        appendDayTitle("Mañana · " + formatDiaAgenda(manana));
+        appendDayItems(manana);
+      }
+      for (var s = 0; s < semana.length; s++) {
+        appendDayTitle(formatDiaAgenda(semana[s]));
+        appendDayItems(semana[s]);
+      }
+      if (proximas.length) {
+        var sec = document.createElement("div");
+        sec.className = "section-title";
+        sec.textContent = "Próximas semanas";
+        lista.appendChild(sec);
+        for (var p = 0; p < proximas.length; p++) {
+          appendDayTitle(formatDiaAgenda(proximas[p]), "day-sub");
+          appendDayItems(proximas[p]);
+        }
+      }
+      return sinDia;
+    }
+
     function addOpenGroup(title, grupo) {
       var items = [];
       for (var i = 0; i < data.items.length; i++) {
@@ -1430,16 +1639,48 @@
         if (!matchesMetaFiltro(it) && it.id !== keepLeavingId) continue;
         items.push(it);
       }
-      items = sortPendientes(items, data, true);
       if (!items.length) return;
       var titleEl = document.createElement("div");
       titleEl.className = "group-title";
       titleEl.textContent = title;
       lista.appendChild(titleEl);
-      appendItems(items);
+      if (grupo === "con_fecha") {
+        var sinDia = appendAgendaBlocks(items);
+        if (sinDia.length) {
+          var sub = document.createElement("div");
+          sub.className = "day-title day-sub";
+          sub.textContent = "Sin día concreto";
+          lista.appendChild(sub);
+          appendItems(sortPendientes(sinDia, data, true));
+        }
+      } else {
+        appendItems(sortPendientes(items, data, true));
+      }
     }
 
-    if (buzonVista === "completo") {
+    if (buzonVista === "agenda") {
+      var agItems = [];
+      for (var ai = 0; ai < data.items.length; ai++) {
+        var ag = data.items[ai];
+        if (ag.hecha && ag.id !== keepLeavingId) continue;
+        if (!validFecha(ag.fecha) && ag.id !== keepLeavingId) continue;
+        if (validFecha(ag.fecha) || ag.id === keepLeavingId) agItems.push(ag);
+      }
+      var had = appendAgendaBlocks(agItems);
+      if (!document.querySelector("#listaBuzon .day-title, #listaBuzon .section-title")) {
+        var emptyAg = document.createElement("p");
+        emptyAg.className = "hint";
+        emptyAg.textContent = "No hay pendientes con fecha. Asígnales una en el buzón y aparecerán aquí.";
+        lista.appendChild(emptyAg);
+      }
+      var nSin = countSinFecha(data);
+      var note = document.createElement("p");
+      note.className = "sin-fecha-note";
+      note.textContent = nSin === 1
+        ? "1 pendiente sin fecha en el buzón"
+        : nSin + " pendientes sin fecha en el buzón";
+      lista.appendChild(note);
+    } else if (buzonVista === "completo") {
       addOpenGroup("Con fecha", "con_fecha");
       addOpenGroup("Sin fecha", "sin_fecha");
     } else {
@@ -1598,13 +1839,15 @@
       subDone.className = "label-sub";
       var hechoTxt = "Hecho: " + item.fecha_hecho + (item.hora_hecho ? " " + item.hora_hecho : "");
       if (item.fecha) hechoTxt += " · " + formatFechaCorta(item.fecha);
+      if (item.hora) hechoTxt += " " + item.hora;
       subDone.textContent = hechoTxt;
       wrap.appendChild(subDone);
-    } else if (!opts.inHechos && (item.fecha || item.nota)) {
+    } else if (!opts.inHechos && (item.fecha || item.nota || item.hora)) {
       var sub = document.createElement("div");
       sub.className = "label-sub";
       var parts = [];
-      if (item.fecha) parts.push(formatFechaCorta(item.fecha));
+      if (item.fecha) parts.push(formatFechaCorta(item.fecha) + (item.hora ? " " + item.hora : ""));
+      else if (item.hora) parts.push(item.hora);
       if (due === "hoy") {
         var hoy = document.createElement("span");
         hoy.className = "due-hoy";
@@ -1786,6 +2029,7 @@
     setChoiceGroup(document.getElementById("editorMeta"), item.meta || "");
     document.getElementById("editorQuePasa").value = item.que_pasa || "";
     document.getElementById("editorFecha").value = item.fecha || "";
+    document.getElementById("editorHora").value = item.hora || "";
     panel.classList.remove("hidden");
     var card = document.querySelector('#listaBuzon .item-card[data-buzon-id="' + id + '"]');
     if (card && card.parentNode) {
@@ -1826,6 +2070,8 @@
       item.fecha = null;
       item.grupo = "sin_fecha";
     }
+    var horaEl = document.getElementById("editorHora");
+    item.hora = normalizeHora(horaEl && horaEl.value);
     saveBuzon(data);
     closeEditor(true);
   }
@@ -1849,6 +2095,7 @@
       grupo: fecha ? "con_fecha" : "sin_fecha",
       nota: "",
       fecha: fecha || null,
+      hora: null,
       hecha: false,
       fecha_hecho: null,
       hora_hecho: null,
@@ -1917,6 +2164,7 @@
       grupo: item.grupo,
       nota: item.nota || "",
       fecha: item.fecha || null,
+      hora: item.hora || null,
       nivel: item.nivel || "buzon",
       consecuencia: consecuenciaDe(item),
       meta: item.meta || "",
@@ -1964,7 +2212,7 @@
   }
 
   function buildBuzonCsv(data) {
-    var lines = ["numero,texto,grupo,fecha,estado,fecha_hecho,hora_hecho,nivel,consecuencia,meta,que_pasa"];
+    var lines = ["numero,texto,grupo,fecha,hora,estado,fecha_hecho,hora_hecho,nivel,consecuencia,meta,que_pasa"];
     for (var i = 0; i < data.items.length; i++) {
       var it = data.items[i];
       lines.push([
@@ -1972,6 +2220,7 @@
         csvEscape(it.texto),
         csvEscape(it.grupo === "con_fecha" ? "con fecha" : "sin fecha"),
         csvEscape(it.fecha || ""),
+        csvEscape(it.hora || ""),
         csvEscape(it.hecha ? "hecha" : "no hecha"),
         csvEscape(it.fecha_hecho || ""),
         csvEscape(it.hora_hecho || ""),
@@ -1989,6 +2238,7 @@
         csvEscape(rec.texto || ""),
         csvEscape(rec.grupo === "con_fecha" ? "con fecha" : "sin fecha"),
         csvEscape(rec.fecha || ""),
+        csvEscape(rec.hora || ""),
         csvEscape("borrado"),
         csvEscape(rec.fecha_hecho || ""),
         csvEscape(rec.hora_hecho || ""),
@@ -2095,7 +2345,7 @@
     var dateKey = ensureToday(store);
     saveStore(store);
     var bInit = loadBuzon();
-    if (bInit.vista === "hoy" || bInit.vista === "semana" || bInit.vista === "completo") buzonVista = bInit.vista;
+    if (bInit.vista === "agenda" || bInit.vista === "hoy" || bInit.vista === "semana" || bInit.vista === "completo") buzonVista = bInit.vista;
     if (bInit.metaFiltro === "dinero" || bInit.metaFiltro === "salud" || bInit.metaFiltro === "orden") buzonMetaFiltro = bInit.metaFiltro;
     document.getElementById("fechaHoy").textContent = formatFechaES(dateKey);
     updateCounter(store, dateKey);
@@ -2122,6 +2372,7 @@
         addBuzonItem();
       }
     });
+    document.getElementById("vistaAgenda").addEventListener("click", function () { setBuzonVista("agenda"); });
     document.getElementById("vistaHoy").addEventListener("click", function () { setBuzonVista("hoy"); });
     document.getElementById("vistaSemana").addEventListener("click", function () { setBuzonVista("semana"); });
     document.getElementById("vistaCompleto").addEventListener("click", function () { setBuzonVista("completo"); });
