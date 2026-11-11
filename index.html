@@ -801,17 +801,33 @@
   var editingId = null;
   var avisoTimer = null;
 
+  function bogotaParts(date) {
+    var d = date || new Date();
+    var parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Bogota",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(d);
+    var map = {};
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].type !== "literal") map[parts[i].type] = parts[i].value;
+    }
+    if (map.hour === "24") map.hour = "00";
+    return map;
+  }
+
   function todayKey() {
-    var d = new Date();
-    var y = d.getFullYear();
-    var m = String(d.getMonth() + 1).padStart(2, "0");
-    var day = String(d.getDate()).padStart(2, "0");
-    return y + "-" + m + "-" + day;
+    var p = bogotaParts();
+    return p.year + "-" + p.month + "-" + p.day;
   }
 
   function nowTime() {
-    var d = new Date();
-    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    var p = bogotaParts();
+    return p.hour + ":" + p.minute;
   }
 
   function formatFechaES(iso) {
