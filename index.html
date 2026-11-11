@@ -227,6 +227,15 @@
     .view-diario .label {
       -webkit-line-clamp: 2;
     }
+    .diario-emoji {
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+      font-size: 1.15rem;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
     .label-sub {
       font-size: 0.7rem;
       color: var(--muted);
@@ -867,6 +876,39 @@
     "Dormir"
   ];
 
+  var TASK_EMOJIS = [
+    "☀️",
+    "💧",
+    "📓",
+    "🛏️",
+    "☕",
+    "🐕",
+    "🍳",
+    "💊",
+    "🪥",
+    "📋",
+    "🏛️",
+    "🍽️",
+    "🧽",
+    "💼",
+    "📞",
+    "📖",
+    "🎵",
+    "🩺",
+    "🔎",
+    "✍️",
+    "🐕‍🦺",
+    "🏋️",
+    "👕",
+    "💰",
+    "🧹",
+    "🙏",
+    "📔",
+    "😮‍💨",
+    "🗒️",
+    "🌙"
+  ];
+
   var BUZON_SEED = [
     { id: "b1", texto: "Propuesta para Sofía (bloque de Secretaría)", grupo: "sin_fecha", nota: "" },
     { id: "b2", texto: "Davibank Salitre Plaza: retirar dinero (llamar antes)", grupo: "sin_fecha", nota: "" },
@@ -1286,6 +1328,11 @@
       sw.className = "switch";
       sw.setAttribute("aria-hidden", "true");
 
+      var emoji = document.createElement("span");
+      emoji.className = "diario-emoji";
+      emoji.setAttribute("aria-hidden", "true");
+      emoji.textContent = TASK_EMOJIS[num - 1] || "";
+
       var label = document.createElement("div");
       label.className = "label";
       label.textContent = num + ". " + TASKS[num - 1];
@@ -1295,6 +1342,7 @@
       check.textContent = "✓";
 
       row.appendChild(sw);
+      row.appendChild(emoji);
       row.appendChild(label);
       row.appendChild(check);
 
