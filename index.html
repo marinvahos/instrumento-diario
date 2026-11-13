@@ -779,7 +779,7 @@
         <button type="button" id="vistaSemana" data-vista="semana" role="tab" aria-selected="false">Esta semana</button>
         <button type="button" id="vistaCompleto" data-vista="completo" class="active" role="tab" aria-selected="true">Buzón completo</button>
       </div>
-      <p class="resumen" id="resumenBuzon">Agenda 0 · Hoy 0/3 · Semana 0/15 · Buzón 0</p>
+      <p class="resumen" id="resumenBuzon">Agenda 0 · Hoy 0 · Semana 0/15 · Buzón 0</p>
       <div class="meta-filtros" id="metaFiltros">
         <button type="button" data-meta="dinero" aria-label="Filtrar por dinero">💰</button>
         <button type="button" data-meta="salud" aria-label="Filtrar por salud">❤️</button>
@@ -1563,6 +1563,38 @@
     return n;
   }
 
+  function belongsInHoyVista(item, keepLeavingId) {
+    if (!item) return false;
+    if (item.hecha && item.id !== keepLeavingId) return false;
+    if (item.nivel === "hoy") return true;
+    var st = fechaStatus(item.fecha);
+    return st === "hoy" || st === "vencido";
+  }
+
+  function countHoyVista(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (belongsInHoyVista(data.items[i])) n++;
+    }
+    return n;
+  }
+
+  function compareHoyVista(a, b, data) {
+    function grupo(it) {
+      var st = fechaStatus(it.fecha);
+      if (st === "vencido") return 0;
+      if (st === "hoy") return 1;
+      if (!validFecha(it.fecha)) return 2;
+      return 3;
+    }
+    var ga = grupo(a);
+    var gb = grupo(b);
+    if (ga !== gb) return ga - gb;
+    if (ga === 0 && a.fecha !== b.fecha) return a.fecha < b.fecha ? -1 : 1;
+    if (ga === 3 && a.fecha !== b.fecha) return a.fecha < b.fecha ? -1 : 1;
+    return compareEnDia(a, b, data);
+  }
+
   function countSinFecha(data) {
     var n = 0;
     for (var i = 0; i < data.items.length; i++) {
@@ -1643,11 +1675,11 @@
       btn.classList.toggle("active", on);
       btn.setAttribute("aria-selected", on ? "true" : "false");
     }
-    var hoyN = countNivel(data, "hoy");
+    var hoyN = countHoyVista(data);
     var semN = countNivel(data, "semana");
     var tot = countBuzonPending(data);
     var agN = countAgenda(data);
-    document.getElementById("resumenBuzon").textContent = "Agenda " + agN + " · Hoy " + hoyN + "/3 · Semana " + semN + "/15 · Buzón " + tot;
+    document.getElementById("resumenBuzon").textContent = "Agenda " + agN + " · Hoy " + hoyN + " · Semana " + semN + "/15 · Buzón " + tot;
     var filtros = document.getElementById("metaFiltros");
     filtros.classList.toggle("hidden", buzonVista !== "completo");
     var chips = filtros.querySelectorAll("button");
@@ -1863,12 +1895,58 @@
     } else if (buzonVista === "completo") {
       addOpenGroup("Con fecha", "con_fecha");
       addOpenGroup("Sin fecha", "sin_fecha");
+    } else if (buzonVista === "hoy") {
+      var hoyItems = [];
+      for (var hi = 0; hi < data.items.length; hi++) {
+        if (belongsInHoyVista(data.items[hi], keepLeavingId)) hoyItems.push(data.items[hi]);
+      }
+      hoyItems.sort(function (a, b) { return compareHoyVista(a, b, data); });
+      if (!hoyItems.length) {
+        var emptyHoy = document.createElement("p");
+        emptyHoy.className = "hint";
+        emptyHoy.textContent = "No hay pendientes para hoy. Aquí salen los de hoy, los vencidos y hasta 3 que muevas a mano desde el Buzón completo.";
+        lista.appendChild(emptyHoy);
+      } else {
+        if (hoyItems.length > 3) {
+          var avisoHoy = document.createElement("p");
+          avisoHoy.className = "aviso";
+          avisoHoy.setAttribute("role", "status");
+          avisoHoy.textContent = "Hoy tienes " + hoyItems.length + " cosas. Elige las 3 más importantes y mueve el resto a otro día.";
+          lista.appendChild(avisoHoy);
+        }
+        var vencidosHoy = [];
+        var hoyDia = [];
+        var sinFechaHoy = [];
+        var otraFechaHoy = [];
+        for (var hj = 0; hj < hoyItems.length; hj++) {
+          var hst = fechaStatus(hoyItems[hj].fecha);
+          if (hst === "vencido") vencidosHoy.push(hoyItems[hj]);
+          else if (hst === "hoy") hoyDia.push(hoyItems[hj]);
+          else if (!validFecha(hoyItems[hj].fecha)) sinFechaHoy.push(hoyItems[hj]);
+          else otraFechaHoy.push(hoyItems[hj]);
+        }
+        if (vencidosHoy.length) {
+          appendDayTitle("Vencidos", "vencidos");
+          appendItems(vencidosHoy);
+        }
+        if (hoyDia.length) {
+          appendDayTitle("Hoy");
+          appendItems(hoyDia);
+        }
+        if (sinFechaHoy.length) {
+          appendDayTitle("Sin fecha");
+          appendItems(sinFechaHoy);
+        }
+        if (otraFechaHoy.length) {
+          appendDayTitle("Otra fecha");
+          appendItems(otraFechaHoy);
+        }
+      }
     } else {
-      var nivel = buzonVista === "hoy" ? "hoy" : "semana";
       var bucket = [];
       for (var i = 0; i < data.items.length; i++) {
         var it = data.items[i];
-        if (it.nivel !== nivel) continue;
+        if (it.nivel !== "semana") continue;
         if (it.hecha && it.id !== keepLeavingId) continue;
         bucket.push(it);
       }
@@ -1876,9 +1954,7 @@
       if (!bucket.length) {
         var empty = document.createElement("p");
         empty.className = "hint";
-        empty.textContent = buzonVista === "hoy"
-          ? "No hay pendientes en Hoy. Mueve hasta 3 desde el Buzón completo."
-          : "No hay pendientes en Esta semana. Mueve hasta 15 desde el Buzón completo.";
+        empty.textContent = "No hay pendientes en Esta semana. Mueve hasta 15 desde el Buzón completo.";
         lista.appendChild(empty);
       } else {
         appendItems(bucket);
