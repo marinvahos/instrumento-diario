@@ -1042,9 +1042,9 @@
     <div id="viewBuzon" class="view-buzon hidden">
       <div class="horizon-tabs" role="tablist" aria-label="Horizonte">
         <button type="button" id="vistaAgenda" data-vista="agenda" role="tab" aria-selected="false">Agenda</button>
-        <button type="button" id="vistaHoy" data-vista="hoy" role="tab" aria-selected="false">Hoy</button>
+        <button type="button" id="vistaHoy" data-vista="hoy" class="active" role="tab" aria-selected="true">Hoy</button>
         <button type="button" id="vistaSemana" data-vista="semana" role="tab" aria-selected="false">Esta semana</button>
-        <button type="button" id="vistaCompleto" data-vista="completo" class="active" role="tab" aria-selected="true">Buzón completo</button>
+        <button type="button" id="vistaCompleto" data-vista="completo" role="tab" aria-selected="false">Buzón completo</button>
         <button type="button" id="vistaCongelado" data-vista="congelado" role="tab" aria-selected="false">Congelado</button>
       </div>
       <div class="filtro-grupo" id="filtroDireccion">
@@ -1316,7 +1316,7 @@
   var currentGroup = 0;
   var currentMode = "diario";
   var audioCtx = null;
-  var buzonVista = "completo";
+  var buzonVista = "hoy";
   var buzonMetaFiltro = "";
   var buzonTipoFiltro = "";
   var editingId = null;
@@ -1556,7 +1556,7 @@
       hechosAbiertos: false,
       deletedIds: [],
       deletedRecords: [],
-      vista: "completo",
+      vista: "hoy",
       metaFiltro: "",
       tipoFiltro: ""
     };
@@ -1636,7 +1636,7 @@
       }
       if (!data.nextCustomId) data.nextCustomId = 1;
       if (typeof data.hechosAbiertos !== "boolean") data.hechosAbiertos = false;
-      if (data.vista !== "agenda" && data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo" && data.vista !== "congelado") data.vista = "completo";
+      if (data.vista !== "agenda" && data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo" && data.vista !== "congelado") data.vista = "hoy";
       data.metaFiltro = migrateMeta(data.metaFiltro);
       if (!metaValida(data.metaFiltro)) data.metaFiltro = "";
       if (!tipoValido(data.tipoFiltro)) data.tipoFiltro = "";
@@ -1957,6 +1957,7 @@
       renderList(store, dateKey);
       updateCounter(store, dateKey);
     } else if (isBuzon) {
+      buzonVista = "hoy";
       renderBuzon();
       updateCounterForMode();
     } else {
