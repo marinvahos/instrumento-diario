@@ -987,6 +987,7 @@
       font-weight: 700;
       color: var(--muted);
     }
+    .ind-alerta { margin: 0 0 10px; }
     .bitacora-form input {
       width: 100%;
       height: 44px;
@@ -1038,6 +1039,80 @@
     .bitacora-tabla th {
       background: var(--tab-bg);
       font-weight: 700;
+    }
+    .ind-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ind-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .ind-card-title {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .ind-card-value {
+      margin: 6px 0 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .ind-card-meta {
+      margin: 4px 0 0;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .bit-lab-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .bit-lab-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .bit-meta {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: right;
+    }
+    .bitacora-prev {
+      margin: 8px 0 0;
+      text-align: center;
+    }
+    .bitacora-prev-link {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .bitacora-vacia {
+      margin: 12px 0 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+    .bitacora-tabla td.num {
+      white-space: nowrap;
+      text-align: right;
     }
     @media (prefers-color-scheme: dark) {
       .ind-alerta { background: #4a3b10; color: #ffe08a; }
@@ -1193,38 +1268,44 @@
 
     <div id="viewIndicadores" class="view-indicadores hidden">
       <div class="ind-section" id="indAutomatico">
-        <h2>Últimos 7 días</h2>
-        <p class="ind-sub">Se calcula solo, con lo que ya marcaste.</p>
-        <div id="indBarras"></div>
+        <h2>Resumen Automático de la Semana</h2>
+        <p class="ind-sub">Se calcula solo, con lo que ya marcaste en los últimos 7 días.</p>
         <p class="ind-alerta hidden" id="indAlerta" role="status"></p>
+        <div class="ind-cards" id="indCards"></div>
       </div>
       <div class="ind-section">
-        <h2>Bitácora Semanal de Resultados Reales</h2>
-        <p class="ind-sub" id="bitacoraSemanaLabel">Esta semana</p>
+        <h2>Bitácora de Resultados Reales</h2>
+        <p class="ind-sub">Cinco números concretos, guardados con la fecha de hoy.</p>
         <form class="bitacora-form" id="formBitacora" action="javascript:void(0)">
-          <label for="bitGrasa">% Grasa corporal
+          <label for="bitGrasa">
+            <span class="bit-lab-row"><span class="bit-lab-name">% Grasa corporal</span><span class="bit-meta">Meta: 16% – 17%</span></span>
             <input type="text" id="bitGrasa" inputmode="decimal" />
           </label>
-          <label for="bitPerimetro">Perímetro abdominal (cm)
-            <input type="text" id="bitPerimetro" inputmode="decimal" />
+          <label for="bitAhorro">
+            <span class="bit-lab-row"><span class="bit-lab-name">Ahorro separado este mes ($ COP)</span><span class="bit-meta">Meta: $2.000.000 – $3.000.000</span></span>
+            <input type="text" id="bitAhorro" inputmode="decimal" />
           </label>
-          <label for="bitDolor">Días sin dolor lumbar/rodilla
-            <input type="text" id="bitDolor" inputmode="numeric" />
+          <label for="bitIngresos">
+            <span class="bit-lab-row"><span class="bit-lab-name">Ingresos por Activos Propios / Escalables ($ COP)</span><span class="bit-meta">ventas, libros, licencias, México</span></span>
+            <input type="text" id="bitIngresos" inputmode="decimal" />
           </label>
-          <label for="bitSaldo">Saldo ahorro ($)
-            <input type="text" id="bitSaldo" inputmode="decimal" />
+          <label for="bitPatrimonio">
+            <span class="bit-lab-row"><span class="bit-lab-name">Patrimonio / Saldo total acumulado ($ COP)</span></span>
+            <input type="text" id="bitPatrimonio" inputmode="decimal" />
           </label>
-          <label for="bitPiezas">Piezas de obra cerradas
-            <input type="text" id="bitPiezas" inputmode="numeric" />
-          </label>
-          <label for="bitCajas">Cajas/bolsas de exceso sacadas de casa
+          <label for="bitCajas">
+            <span class="bit-lab-row"><span class="bit-lab-name">Bolsas o cajas de exceso sacadas de casa</span><span class="bit-meta">Meta: 1 por día hasta despejar</span></span>
             <input type="text" id="bitCajas" inputmode="numeric" />
           </label>
           <div class="bitacora-actions">
-            <button type="button" id="btnGuardarBitacora">Guardar semana</button>
-            <button type="button" id="btnExportarBitacora">Exportar Resultados (CSV)</button>
+            <button type="button" id="btnGuardarBitacora">Guardar</button>
+            <button type="button" id="btnExportarBitacora">Exportar CSV</button>
           </div>
         </form>
+        <p class="bitacora-prev hidden" id="bitacoraAnteriorWrap">
+          <button type="button" class="bitacora-prev-link" id="btnExportarBitacoraAnterior">Exportar bitácora anterior (CSV)</button>
+        </p>
+        <p class="bitacora-vacia hidden" id="bitacoraVacia">Aún no hay registros.</p>
         <div class="bitacora-tabla-wrap">
           <table class="bitacora-tabla" id="tablaBitacora"></table>
         </div>
@@ -1356,6 +1437,7 @@
   var STORAGE_KEY = "instrumentoDiario.v1";
   var BUZON_KEY = "instrumentoDiario.buzon.v1";
   var BITACORA_KEY = "instrumentoDiario.bitacora.v1";
+  var BITACORA_V2_KEY = "instrumentoDiario.bitacora.v2";
   var currentGroup = 0;
   var currentMode = "diario";
   var audioCtx = null;
@@ -3534,64 +3616,69 @@
     return n;
   }
 
+  function diaCumplido(day) {
+    return !!(day && day.tasks && countDone(day) === 30);
+  }
+
+  function countCerradasMetaRango(data, meta, start, end) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      var it = data.items[i];
+      if (!it.hecha) continue;
+      if (it.meta !== meta) continue;
+      if (!validFecha(it.fecha_hecho)) continue;
+      if (it.fecha_hecho >= start && it.fecha_hecho <= end) n++;
+    }
+    return n;
+  }
+
   function renderIndicadores() {
     var store = loadStore();
     ensureToday(store);
     saveStore(store);
     var data = loadBuzon();
     var today = todayKey();
-    var sum = 0;
-    var dias = 0;
-    var org = 0;
+    var cumplidos = 0;
     for (var d = 0; d < 7; d++) {
       var key = isoAddDays(today, -d);
-      var day = store.days[key];
-      var c = cumplimientoDeDia(day);
-      if (c != null) {
-        sum += c;
-        dias++;
-      } else if (key === today) {
-        sum += 0;
-        dias++;
-      }
-      if (diaOrganizacion(day)) org++;
+      if (diaCumplido(store.days[key])) cumplidos++;
     }
-    var pct = dias ? Math.round((sum / dias) * 100) : 0;
     var esc = countCerradasMeta(data, "escalables", 7);
     var com = countCerradasMeta(data, "compromisos", 7);
-    var hog = countCerradasMeta(data, "hogar", 7);
-    var bars = [
-      ["% Cumplimiento Diario (30 ítems)", pct + "%", Math.min(100, pct)],
-      ["Apuestas Escalables cerradas (meta 3/sem)", esc + " / 3", Math.min(100, Math.round((esc / 3) * 100))],
-      ["Trabajo y Salario cerrados", String(com), Math.min(100, Math.round((com / 5) * 100))],
-      ["Días de Organización Estructural", org + " de 7", Math.min(100, Math.round((org / 7) * 100))]
+    var saludHogar = countCerradasMeta(data, "salud_cuerpo", 7) + countCerradasMeta(data, "hogar", 7);
+    var cards = [
+      ["Días cumplidos en Diario", cumplidos + " / 7", ""],
+      ["Acciones cerradas en Apuestas Escalables", String(esc), "Meta: ≥ 3 por semana"],
+      ["Acciones cerradas en Trabajo / Salario", String(com), "(al día)"],
+      ["Acciones cerradas en Salud y Cuerpo + Hogar y Trámites", String(saludHogar), ""]
     ];
-    var box = document.getElementById("indBarras");
+    var box = document.getElementById("indCards");
     box.innerHTML = "";
-    for (var b = 0; b < bars.length; b++) {
-      var row = document.createElement("div");
-      row.className = "ind-row";
-      var lab = document.createElement("div");
-      lab.className = "ind-lab";
-      var t1 = document.createElement("span");
-      t1.textContent = bars[b][0];
-      var t2 = document.createElement("span");
-      t2.textContent = bars[b][1];
-      lab.appendChild(t1);
-      lab.appendChild(t2);
-      var bar = document.createElement("div");
-      bar.className = "ind-bar";
-      var fill = document.createElement("div");
-      fill.className = "ind-bar-fill";
-      fill.style.width = bars[b][2] + "%";
-      bar.appendChild(fill);
-      row.appendChild(lab);
-      row.appendChild(bar);
-      box.appendChild(row);
+    for (var b = 0; b < cards.length; b++) {
+      var card = document.createElement("div");
+      card.className = "ind-card";
+      var title = document.createElement("p");
+      title.className = "ind-card-title";
+      title.textContent = cards[b][0];
+      var val = document.createElement("p");
+      val.className = "ind-card-value";
+      val.textContent = cards[b][1];
+      card.appendChild(title);
+      card.appendChild(val);
+      if (cards[b][2]) {
+        var meta = document.createElement("p");
+        meta.className = "ind-card-meta";
+        meta.textContent = cards[b][2];
+        card.appendChild(meta);
+      }
+      box.appendChild(card);
     }
     var alerta = document.getElementById("indAlerta");
-    if (hog >= 5 && esc === 0) {
-      alerta.textContent = "Alerta de desviación: estás resolviendo logística doméstica sin mover proyectos escalables.";
+    var esDomingo = isoWeekdayMon1(today) === 7;
+    var lunes = weekMonday(today);
+    var escSemana = countCerradasMetaRango(data, "escalables", lunes, today);
+    if (esDomingo && escSemana === 0) {
+      alerta.textContent = "Aviso de rumbo: aún no has cerrado ninguna Apuesta Escalable esta semana. Dedica 90 min hoy a tus activos propios.";
       alerta.classList.remove("hidden");
     } else {
       alerta.textContent = "";
@@ -3629,31 +3716,177 @@
     localStorage.setItem(BITACORA_KEY, JSON.stringify(data));
   }
 
-  function bitacoraCampos() {
+  function loadBitacoraV2() {
+    try {
+      var raw = localStorage.getItem(BITACORA_V2_KEY);
+      if (!raw) return { registros: [] };
+      var data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.registros)) data = { registros: [] };
+      var out = [];
+      for (var i = 0; i < data.registros.length; i++) {
+        var rec = data.registros[i] || {};
+        if (!validFecha(rec.fecha)) continue;
+        out.push({
+          fecha: rec.fecha,
+          grasa: rec.grasa != null ? rec.grasa : "",
+          ahorro: rec.ahorro != null ? rec.ahorro : "",
+          ingresos: rec.ingresos != null ? rec.ingresos : "",
+          patrimonio: rec.patrimonio != null ? rec.patrimonio : "",
+          cajas: rec.cajas != null ? rec.cajas : ""
+        });
+      }
+      return { registros: out };
+    } catch (e) {
+      return { registros: [] };
+    }
+  }
+
+  function saveBitacoraV2(data) {
+    localStorage.setItem(BITACORA_V2_KEY, JSON.stringify(data));
+  }
+
+  function bitacoraV1TieneDatos() {
+    var data = loadBitacora();
+    var keys = Object.keys(data.semanas || {});
+    var campos = ["grasa", "perimetro", "diasSinDolor", "saldo", "piezas", "cajas"];
+    for (var i = 0; i < keys.length; i++) {
+      var rec = data.semanas[keys[i]] || {};
+      for (var j = 0; j < campos.length; j++) {
+        if (rec[campos[j]] != null && String(rec[campos[j]]).trim() !== "") return true;
+      }
+    }
+    return false;
+  }
+
+  function bitacoraCamposV2() {
     return [
       ["grasa", "bitGrasa"],
-      ["perimetro", "bitPerimetro"],
-      ["diasSinDolor", "bitDolor"],
-      ["saldo", "bitSaldo"],
-      ["piezas", "bitPiezas"],
+      ["ahorro", "bitAhorro"],
+      ["ingresos", "bitIngresos"],
+      ["patrimonio", "bitPatrimonio"],
       ["cajas", "bitCajas"]
     ];
   }
 
+  function parseDecimal(str) {
+    var s = String(str == null ? "" : str).trim().replace(/\s/g, "").replace(",", ".");
+    if (!s) return null;
+    var n = Number(s);
+    if (!isFinite(n)) return null;
+    return n;
+  }
+
+  function parseCOP(str) {
+    var s = String(str == null ? "" : str).trim();
+    if (!s) return null;
+    s = s.replace(/\$/g, "").replace(/\s/g, "");
+    if (!s) return null;
+    if (s.indexOf(",") >= 0) {
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+      s = s.replace(/\./g, "");
+    }
+    var n = Number(s);
+    if (!isFinite(n)) return null;
+    return n;
+  }
+
+  function formatCOP(val) {
+    var n = typeof val === "number" ? val : parseCOP(val);
+    if (n == null) return "—";
+    var sign = n < 0 ? "-" : "";
+    var whole = String(Math.round(Math.abs(n)));
+    var out = "";
+    while (whole.length > 3) {
+      out = "." + whole.slice(-3) + out;
+      whole = whole.slice(0, -3);
+    }
+    return sign + "$" + whole + out;
+  }
+
+  function formatGrasa(val) {
+    if (val == null || String(val).trim() === "") return "—";
+    var n = typeof val === "number" ? val : parseDecimal(val);
+    if (n == null) return String(val);
+    var s = String(n);
+    return s.replace(".", ",");
+  }
+
+  function formatCajas(val) {
+    if (val == null || String(val).trim() === "") return "—";
+    var n = typeof val === "number" ? val : parseDecimal(val);
+    if (n == null) return String(val);
+    return String(n);
+  }
+
+  function valorCampoBitacora(key, raw) {
+    var s = raw == null ? "" : String(raw).trim();
+    if (!s) return "";
+    if (key === "grasa" || key === "cajas") {
+      var d = parseDecimal(s);
+      return d == null ? s : d;
+    }
+    var n = parseCOP(s);
+    return n == null ? s : n;
+  }
+
+  function displayCampoBitacora(key, val) {
+    if (key === "grasa") return formatGrasa(val);
+    if (key === "cajas") return formatCajas(val);
+    return formatCOP(val);
+  }
+
+  function inputCampoBitacora(key, val) {
+    if (val == null || String(val).trim() === "") return "";
+    if (key === "grasa") {
+      var g = parseDecimal(val);
+      return g == null ? String(val) : String(g).replace(".", ",");
+    }
+    if (key === "cajas") {
+      var c = parseDecimal(val);
+      return c == null ? String(val) : String(c);
+    }
+    var n = typeof val === "number" ? val : parseCOP(val);
+    if (n == null) return String(val);
+    return formatCOP(n).replace("$", "");
+  }
+
+  function registroDeFecha(data, fecha) {
+    for (var i = 0; i < data.registros.length; i++) {
+      if (data.registros[i].fecha === fecha) return data.registros[i];
+    }
+    return null;
+  }
+
   function renderBitacora() {
-    var lunes = weekMonday(todayKey());
-    document.getElementById("bitacoraSemanaLabel").textContent = "Semana del " + formatSemanaRango(lunes);
-    var data = loadBitacora();
-    var cur = data.semanas[lunes] || {};
-    var campos = bitacoraCampos();
+    var today = todayKey();
+    var data = loadBitacoraV2();
+    var cur = registroDeFecha(data, today) || {};
+    var campos = bitacoraCamposV2();
     for (var i = 0; i < campos.length; i++) {
       var el = document.getElementById(campos[i][1]);
-      if (el) el.value = cur[campos[i][0]] != null ? String(cur[campos[i][0]]) : "";
+      if (el) el.value = inputCampoBitacora(campos[i][0], cur[campos[i][0]]);
     }
-    var headers = ["Semana", "% Grasa", "Perím. (cm)", "Días sin dolor", "Ahorro ($)", "Piezas", "Cajas"];
-    var keys = ["grasa", "perimetro", "diasSinDolor", "saldo", "piezas", "cajas"];
+    var wrapAnt = document.getElementById("bitacoraAnteriorWrap");
+    if (bitacoraV1TieneDatos()) wrapAnt.classList.remove("hidden");
+    else wrapAnt.classList.add("hidden");
+    var headers = ["Fecha", "% Grasa", "Ahorro", "Ingresos", "Patrimonio", "Exceso"];
+    var keys = ["grasa", "ahorro", "ingresos", "patrimonio", "cajas"];
     var tabla = document.getElementById("tablaBitacora");
+    var vacia = document.getElementById("bitacoraVacia");
     tabla.innerHTML = "";
+    var regs = data.registros.slice().sort(function (a, b) {
+      if (a.fecha < b.fecha) return 1;
+      if (a.fecha > b.fecha) return -1;
+      return 0;
+    });
+    if (!regs.length) {
+      vacia.classList.remove("hidden");
+      tabla.classList.add("hidden");
+      return;
+    }
+    vacia.classList.add("hidden");
+    tabla.classList.remove("hidden");
     var thead = document.createElement("thead");
     var hr = document.createElement("tr");
     for (var h = 0; h < headers.length; h++) {
@@ -3664,16 +3897,16 @@
     thead.appendChild(hr);
     tabla.appendChild(thead);
     var tb = document.createElement("tbody");
-    for (var w = 0; w < 8; w++) {
-      var mon = isoAddDays(lunes, -7 * w);
-      var rec = data.semanas[mon] || {};
+    for (var r = 0; r < regs.length; r++) {
+      var rec = regs[r];
       var tr = document.createElement("tr");
       var td0 = document.createElement("td");
-      td0.textContent = formatSemanaRango(mon);
+      td0.textContent = formatFechaCorta(rec.fecha) || rec.fecha;
       tr.appendChild(td0);
       for (var k = 0; k < keys.length; k++) {
         var td = document.createElement("td");
-        td.textContent = rec[keys[k]] != null && rec[keys[k]] !== "" ? String(rec[keys[k]]) : "—";
+        td.className = "num";
+        td.textContent = displayCampoBitacora(keys[k], rec[keys[k]]);
         tr.appendChild(td);
       }
       tb.appendChild(tr);
@@ -3682,20 +3915,50 @@
   }
 
   function guardarBitacora() {
-    var lunes = weekMonday(todayKey());
-    var data = loadBitacora();
-    var rec = {};
-    var campos = bitacoraCampos();
+    var today = todayKey();
+    var data = loadBitacoraV2();
+    var rec = { fecha: today };
+    var campos = bitacoraCamposV2();
     for (var i = 0; i < campos.length; i++) {
       var el = document.getElementById(campos[i][1]);
-      rec[campos[i][0]] = el ? String(el.value || "").trim() : "";
+      rec[campos[i][0]] = valorCampoBitacora(campos[i][0], el ? el.value : "");
     }
-    data.semanas[lunes] = rec;
-    saveBitacora(data);
+    var found = -1;
+    for (var j = 0; j < data.registros.length; j++) {
+      if (data.registros[j].fecha === today) { found = j; break; }
+    }
+    if (found >= 0) data.registros[found] = rec;
+    else data.registros.push(rec);
+    saveBitacoraV2(data);
     renderBitacora();
   }
 
   function exportBitacoraCsv() {
+    var data = loadBitacoraV2();
+    var lines = ["fecha,grasa_corporal_pct,ahorro_separado_mes_cop,ingresos_activos_propios_cop,patrimonio_saldo_total_cop,bolsas_cajas_exceso"];
+    var regs = data.registros.slice().sort(function (a, b) {
+      if (a.fecha < b.fecha) return -1;
+      if (a.fecha > b.fecha) return 1;
+      return 0;
+    });
+    for (var i = 0; i < regs.length; i++) {
+      var rec = regs[i];
+      lines.push([
+        csvEscape(rec.fecha),
+        csvEscape(rec.grasa === "" || rec.grasa == null ? "" : rec.grasa),
+        csvEscape(rec.ahorro === "" || rec.ahorro == null ? "" : rec.ahorro),
+        csvEscape(rec.ingresos === "" || rec.ingresos == null ? "" : rec.ingresos),
+        csvEscape(rec.patrimonio === "" || rec.patrimonio == null ? "" : rec.patrimonio),
+        csvEscape(rec.cajas === "" || rec.cajas == null ? "" : rec.cajas)
+      ].join(","));
+    }
+    var csv = "\uFEFF" + lines.join("\r\n");
+    var filename = "bitacora-resultados-" + todayKey() + ".csv";
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, filename);
+  }
+
+  function exportBitacoraAnteriorCsv() {
     var data = loadBitacora();
     var lunes = weekMonday(todayKey());
     var lines = ["semana_inicio,semana_fin,grasa_corporal_pct,perimetro_abdominal_cm,dias_sin_dolor,saldo_ahorro,piezas_obra,cajas_exceso"];
@@ -3718,7 +3981,7 @@
       ].join(","));
     }
     var csv = "\uFEFF" + lines.join("\r\n");
-    var filename = "bitacora-resultados-" + todayKey() + ".csv";
+    var filename = "bitacora-anterior-" + todayKey() + ".csv";
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     downloadBlob(blob, filename);
   }
@@ -3841,6 +4104,7 @@
     document.getElementById("editorCancelar").addEventListener("click", function () { closeEditor(false); });
     document.getElementById("btnGuardarBitacora").addEventListener("click", guardarBitacora);
     document.getElementById("btnExportarBitacora").addEventListener("click", exportBitacoraCsv);
+    document.getElementById("btnExportarBitacoraAnterior").addEventListener("click", exportBitacoraAnteriorCsv);
 
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") refreshIfNewDay();
