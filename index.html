@@ -109,7 +109,7 @@
       border-radius: 10px;
       background: var(--tab-bg);
       color: var(--text);
-      font-size: 1rem;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
     }
@@ -477,13 +477,14 @@
     }
     .horizon-tabs button {
       flex: 1;
+      min-width: 0;
       min-height: 40px;
-      padding: 4px 4px;
+      padding: 4px 2px;
       border: none;
       border-radius: 10px;
       background: var(--tab-bg);
       color: var(--text);
-      font-size: 0.7rem;
+      font-size: 0.62rem;
       font-weight: 700;
       line-height: 1.15;
       cursor: pointer;
@@ -742,6 +743,157 @@
       .row.cons-grave { background: #3a1c20; }
       .chip-tipo { background: #2a3348; color: var(--text); }
     }
+    .btn-completar-manana {
+      width: 100%;
+      height: 44px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent-2);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .bloque-title {
+      margin: 8px 4px 4px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .bloque-title:first-child { margin-top: 2px; }
+    .cultivo-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--tab-bg);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cultivo-toggle .chev { transition: transform 0.2s ease; }
+    .cultivo-toggle.open .chev { transform: rotate(90deg); }
+    .cultivo-body { margin-top: 4px; }
+    .cultivo-body.collapsed { display: none; }
+    .hint-dia-viejo {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+    .ind-section { margin-bottom: 16px; }
+    .ind-section h2 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .ind-sub {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .ind-row { margin-bottom: 10px; }
+    .ind-lab {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .ind-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: var(--btn-secondary);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .ind-bar-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      background: var(--accent-2);
+    }
+    .ind-alerta {
+      margin: 8px 0 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #fff3cd;
+      color: #6a4b00;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .bitacora-form label {
+      display: block;
+      margin: 8px 0 0;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .bitacora-form input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .bitacora-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .bitacora-actions button, .btn-ind-export {
+      flex: 1;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #btnGuardarBitacora {
+      background: var(--accent-2);
+      color: #fff;
+    }
+    #btnExportarBitacora {
+      background: var(--btn-secondary);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .bitacora-tabla-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .bitacora-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.7rem;
+    }
+    .bitacora-tabla th, .bitacora-tabla td {
+      border: 1px solid var(--border);
+      padding: 6px 4px;
+      text-align: center;
+    }
+    .bitacora-tabla th {
+      background: var(--tab-bg);
+      font-weight: 700;
+    }
+    @media (prefers-color-scheme: dark) {
+      .ind-alerta { background: #4a3b10; color: #ffe08a; }
+    }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -750,16 +902,17 @@
     <header>
       <h1>Instrumento diario</h1>
       <p class="meta" id="fechaHoy"></p>
-      <p class="counter" id="contador">Llevas 0 de 30</p>
+      <p class="counter" id="contador">Llevas 0 de 16</p>
     </header>
 
     <div class="mode-tabs" role="tablist" aria-label="Vista">
       <button type="button" class="active" id="modeDiario" data-mode="diario" role="tab" aria-selected="true">Diario</button>
       <button type="button" id="modeBuzon" data-mode="buzon" role="tab" aria-selected="false">Buzón</button>
+      <button type="button" id="modeIndicadores" data-mode="indicadores" role="tab" aria-selected="false">Indicadores</button>
     </div>
 
     <div id="viewDiario" class="view-diario">
-      <div class="tabs" role="tablist">
+      <div class="tabs hidden" id="diarioTabs" role="tablist">
         <button type="button" class="active" data-group="0" role="tab" aria-selected="true">1 a 10</button>
         <button type="button" data-group="1" role="tab" aria-selected="false">11 a 20</button>
         <button type="button" data-group="2" role="tab" aria-selected="false">21 a 30</button>
@@ -778,12 +931,14 @@
         <button type="button" id="vistaHoy" data-vista="hoy" role="tab" aria-selected="false">Hoy</button>
         <button type="button" id="vistaSemana" data-vista="semana" role="tab" aria-selected="false">Esta semana</button>
         <button type="button" id="vistaCompleto" data-vista="completo" class="active" role="tab" aria-selected="true">Buzón completo</button>
+        <button type="button" id="vistaCongelado" data-vista="congelado" role="tab" aria-selected="false">Congelado</button>
       </div>
       <p class="resumen" id="resumenBuzon">Agenda 0 · Hoy 0 · Semana 0/15 · Buzón 0</p>
       <div class="meta-filtros" id="metaFiltros">
-        <button type="button" data-meta="dinero" aria-label="Filtrar por dinero">💰</button>
-        <button type="button" data-meta="salud" aria-label="Filtrar por salud">❤️</button>
-        <button type="button" data-meta="orden" aria-label="Filtrar por orden">🧹</button>
+        <button type="button" data-meta="salud_cuerpo" aria-label="Filtrar por Salud y Cuerpo">💪</button>
+        <button type="button" data-meta="compromisos" aria-label="Filtrar por Compromisos Actuales">📋</button>
+        <button type="button" data-meta="escalables" aria-label="Filtrar por Apuestas Escalables">🚀</button>
+        <button type="button" data-meta="hogar" aria-label="Filtrar por Hogar y Trámites">🏡</button>
       </div>
       <div class="meta-filtros tipo-filtros" id="tipoFiltros">
         <button type="button" data-tipo="fuera" aria-label="Filtrar por fuera de la casa">🚶</button>
@@ -812,10 +967,10 @@
         </div>
         <p class="editor-label">Meta</p>
         <div class="choice-row" id="editorMeta" role="group">
-          <button type="button" data-val="dinero">💰 Dinero</button>
-          <button type="button" data-val="salud">❤️ Salud</button>
-          <button type="button" data-val="orden">🧹 Orden</button>
-          <button type="button" data-val="ninguna">Ninguna (pero toca)</button>
+          <button type="button" data-val="salud_cuerpo">💪 Salud y Cuerpo</button>
+          <button type="button" data-val="compromisos">📋 Compromisos Actuales</button>
+          <button type="button" data-val="escalables">🚀 Apuestas Escalables</button>
+          <button type="button" data-val="hogar">🏡 Hogar y Trámites</button>
         </div>
         <label class="editor-label" for="editorQuePasa">¿Qué pasa si no lo hago?</label>
         <input type="text" id="editorQuePasa" maxlength="160" placeholder="Un recordatorio corto…" />
@@ -861,10 +1016,10 @@
         </div>
         <p class="editor-label">Meta</p>
         <div class="choice-row" id="addMeta" role="group">
-          <button type="button" data-val="dinero">💰 Dinero</button>
-          <button type="button" data-val="salud">❤️ Salud</button>
-          <button type="button" data-val="orden">🧹 Orden</button>
-          <button type="button" data-val="ninguna">Ninguna (pero toca)</button>
+          <button type="button" data-val="salud_cuerpo">💪 Salud y Cuerpo</button>
+          <button type="button" data-val="compromisos">📋 Compromisos Actuales</button>
+          <button type="button" data-val="escalables">🚀 Apuestas Escalables</button>
+          <button type="button" data-val="hogar">🏡 Hogar y Trámites</button>
         </div>
       </div>
       <input type="date" id="inputFechaItem" class="fecha-picker-hidden" tabindex="-1" aria-hidden="true" />
@@ -872,6 +1027,46 @@
         <button type="button" class="btn-export" id="btnExportarBuzon">Exportar buzón (CSV)</button>
       </div>
       <p class="hint">Al marcar un pendiente, pasa a Hechos abajo. Toca Hechos para verlo o desmarcarlo.</p>
+    </div>
+
+    <div id="viewIndicadores" class="view-indicadores hidden">
+      <div class="ind-section" id="indAutomatico">
+        <h2>Últimos 7 días</h2>
+        <p class="ind-sub">Se calcula solo, con lo que ya marcaste.</p>
+        <div id="indBarras"></div>
+        <p class="ind-alerta hidden" id="indAlerta" role="status"></p>
+      </div>
+      <div class="ind-section">
+        <h2>Bitácora Semanal de Resultados Reales</h2>
+        <p class="ind-sub" id="bitacoraSemanaLabel">Esta semana</p>
+        <form class="bitacora-form" id="formBitacora" action="javascript:void(0)">
+          <label for="bitGrasa">% Grasa corporal
+            <input type="text" id="bitGrasa" inputmode="decimal" />
+          </label>
+          <label for="bitPerimetro">Perímetro abdominal (cm)
+            <input type="text" id="bitPerimetro" inputmode="decimal" />
+          </label>
+          <label for="bitDolor">Días sin dolor lumbar/rodilla
+            <input type="text" id="bitDolor" inputmode="numeric" />
+          </label>
+          <label for="bitSaldo">Saldo ahorro ($)
+            <input type="text" id="bitSaldo" inputmode="decimal" />
+          </label>
+          <label for="bitPiezas">Piezas de obra cerradas
+            <input type="text" id="bitPiezas" inputmode="numeric" />
+          </label>
+          <label for="bitCajas">Cajas/bolsas de exceso sacadas de casa
+            <input type="text" id="bitCajas" inputmode="numeric" />
+          </label>
+          <div class="bitacora-actions">
+            <button type="button" id="btnGuardarBitacora">Guardar semana</button>
+            <button type="button" id="btnExportarBitacora">Exportar Resultados (CSV)</button>
+          </div>
+        </form>
+        <div class="bitacora-tabla-wrap">
+          <table class="bitacora-tabla" id="tablaBitacora"></table>
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -944,6 +1139,38 @@
     "🌙"
   ];
 
+  var TASKS_V13 = [
+    "Levantarse + Agua",
+    "3 páginas de descarga",
+    "Tender cama",
+    "Paseo AM Bielka",
+    "Desayuno limpio",
+    "Medicamentos",
+    "Cepillarse los dientes + Café",
+    "Almuerzo limpio",
+    "Lavar loza al terminar de comer",
+    "15 min Organización Estructural (asignar sitio fijo / sacar exceso)",
+    "Movimiento sin impacto (40 min)",
+    "Paseo PM Bielka",
+    "Cepillarse los dientes",
+    "Preparar CPAP y cuaderno",
+    "Verificar Estación de Salida en puerta (llaves, documentos, bolso)",
+    "Dormir",
+    "Estudio de música",
+    "Lectura",
+    "Estudio de medicina",
+    "Escritura creativa",
+    "Llamar a mamá",
+    "Meditar"
+  ];
+
+  var TASK_EMOJIS_V13 = [
+    "☀️", "📓", "🛏️", "🐕", "🍳", "💊", "🪥",
+    "🍽️", "🧽", "📦", "🚶", "🐕‍🦺",
+    "🪥", "😮‍💨", "👜", "🌙",
+    "🎵", "📖", "🩺", "✍️", "📞", "🙏"
+  ];
+
   var BUZON_SEED = [
     { id: "b1", texto: "Propuesta para Sofía (bloque de Secretaría)", grupo: "sin_fecha", nota: "" },
     { id: "b2", texto: "Davibank Salitre Plaza: retirar dinero (llamar antes)", grupo: "sin_fecha", nota: "" },
@@ -966,6 +1193,7 @@
 
   var STORAGE_KEY = "instrumentoDiario.v1";
   var BUZON_KEY = "instrumentoDiario.buzon.v1";
+  var BITACORA_KEY = "instrumentoDiario.bitacora.v1";
   var currentGroup = 0;
   var currentMode = "diario";
   var audioCtx = null;
@@ -1033,11 +1261,45 @@
   }
 
   function emptyDay() {
+    return emptyDayV13();
+  }
+
+  function emptyDayLegacy() {
     var tasks = {};
     for (var i = 1; i <= 30; i++) {
       tasks[String(i)] = { hecha: false, hora: null };
     }
     return { tasks: tasks };
+  }
+
+  function emptyDayV13() {
+    var tasks = {};
+    for (var i = 1; i <= TASKS_V13.length; i++) {
+      tasks[String(i)] = { hecha: false, hora: null };
+    }
+    return { tasks: tasks, schema: "v13" };
+  }
+
+  function isV13Day(day) {
+    return !!(day && day.schema === "v13");
+  }
+
+  function tasksForDay(day) {
+    return isV13Day(day) ? TASKS_V13 : TASKS;
+  }
+
+  function emojisForDay(day) {
+    return isV13Day(day) ? TASK_EMOJIS_V13 : TASK_EMOJIS;
+  }
+
+  function dayHasAnyMark(day) {
+    if (!day || !day.tasks) return false;
+    var keys = Object.keys(day.tasks);
+    for (var i = 0; i < keys.length; i++) {
+      var t = day.tasks[keys[i]];
+      if (t && (t.hecha || t.hora)) return true;
+    }
+    return false;
   }
 
   function loadStore() {
@@ -1060,7 +1322,9 @@
   function ensureToday(store) {
     var key = todayKey();
     if (!store.days[key]) {
-      store.days[key] = emptyDay();
+      store.days[key] = emptyDayV13();
+    } else if (!isV13Day(store.days[key]) && !dayHasAnyMark(store.days[key])) {
+      store.days[key] = emptyDayV13();
     }
     store.lastDate = key;
     return key;
@@ -1070,14 +1334,33 @@
     return tipo === "fuera" || tipo === "casa" || tipo === "computador" || tipo === "telefono";
   }
 
+  function migrateMeta(meta) {
+    if (meta === "salud") return "salud_cuerpo";
+    if (meta === "orden") return "hogar";
+    if (meta === "dinero") return "compromisos";
+    if (meta === "ninguna") return "";
+    if (meta === "salud_cuerpo" || meta === "compromisos" || meta === "escalables" || meta === "hogar") return meta;
+    return "";
+  }
+
+  function metaValida(meta) {
+    return meta === "salud_cuerpo" || meta === "compromisos" || meta === "escalables" || meta === "hogar";
+  }
+
+  function iconMeta(meta) {
+    if (meta === "salud_cuerpo") return "💪";
+    if (meta === "compromisos") return "📋";
+    if (meta === "escalables") return "🚀";
+    if (meta === "hogar") return "🏡";
+    return "";
+  }
+
   function normalizeItem(item) {
     if (!item) return item;
     var n = Number(item.consecuencia);
     if (!(n >= 0 && n <= 3)) item.consecuencia = 0;
     else item.consecuencia = n;
-    if (item.meta !== "dinero" && item.meta !== "salud" && item.meta !== "orden" && item.meta !== "ninguna") {
-      item.meta = "";
-    }
+    item.meta = migrateMeta(item.meta);
     if (!tipoValido(item.tipo)) {
       item.tipo = "";
     }
@@ -1186,10 +1469,14 @@
       for (var ni = 0; ni < data.items.length; ni++) {
         normalizeItem(data.items[ni]);
       }
+      for (var dr = 0; dr < data.deletedRecords.length; dr++) {
+        if (data.deletedRecords[dr]) data.deletedRecords[dr].meta = migrateMeta(data.deletedRecords[dr].meta);
+      }
       if (!data.nextCustomId) data.nextCustomId = 1;
       if (typeof data.hechosAbiertos !== "boolean") data.hechosAbiertos = false;
-      if (data.vista !== "agenda" && data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo") data.vista = "completo";
-      if (data.metaFiltro !== "dinero" && data.metaFiltro !== "salud" && data.metaFiltro !== "orden") data.metaFiltro = "";
+      if (data.vista !== "agenda" && data.vista !== "hoy" && data.vista !== "semana" && data.vista !== "completo" && data.vista !== "congelado") data.vista = "completo";
+      data.metaFiltro = migrateMeta(data.metaFiltro);
+      if (!metaValida(data.metaFiltro)) data.metaFiltro = "";
       if (!tipoValido(data.tipoFiltro)) data.tipoFiltro = "";
       return data;
     } catch (e) {
@@ -1276,11 +1563,16 @@
   }
 
   function countDone(day) {
+    var max = isV13Day(day) ? 16 : 30;
     var n = 0;
-    for (var i = 1; i <= 30; i++) {
+    for (var i = 1; i <= max; i++) {
       if (day.tasks[String(i)] && day.tasks[String(i)].hecha) n++;
     }
     return n;
+  }
+
+  function diarioTotal(day) {
+    return isV13Day(day) ? 16 : 30;
   }
 
   function countBuzonDone(data) {
@@ -1311,82 +1603,185 @@
     } else {
       var store = loadStore();
       var dateKey = ensureToday(store);
-      contador.textContent = "Llevas " + countDone(store.days[dateKey]) + " de 30";
+      var day = store.days[dateKey];
+      contador.textContent = "Llevas " + countDone(day) + " de " + diarioTotal(day);
     }
   }
 
   function updateCounter(store, dateKey) {
     if (currentMode !== "diario") return;
-    document.getElementById("contador").textContent = "Llevas " + countDone(store.days[dateKey]) + " de 30";
+    var day = store.days[dateKey];
+    document.getElementById("contador").textContent = "Llevas " + countDone(day) + " de " + diarioTotal(day);
   }
 
   function setMode(mode) {
     currentMode = mode;
     var diarioBtn = document.getElementById("modeDiario");
     var buzonBtn = document.getElementById("modeBuzon");
+    var indBtn = document.getElementById("modeIndicadores");
     var viewDiario = document.getElementById("viewDiario");
     var viewBuzon = document.getElementById("viewBuzon");
+    var viewInd = document.getElementById("viewIndicadores");
     var isDiario = mode === "diario";
+    var isBuzon = mode === "buzon";
+    var isInd = mode === "indicadores";
     diarioBtn.classList.toggle("active", isDiario);
-    buzonBtn.classList.toggle("active", !isDiario);
+    buzonBtn.classList.toggle("active", isBuzon);
+    if (indBtn) indBtn.classList.toggle("active", isInd);
     diarioBtn.setAttribute("aria-selected", isDiario ? "true" : "false");
-    buzonBtn.setAttribute("aria-selected", isDiario ? "false" : "true");
+    buzonBtn.setAttribute("aria-selected", isBuzon ? "true" : "false");
+    if (indBtn) indBtn.setAttribute("aria-selected", isInd ? "true" : "false");
     viewDiario.classList.toggle("hidden", !isDiario);
-    viewBuzon.classList.toggle("hidden", isDiario);
+    viewBuzon.classList.toggle("hidden", !isBuzon);
+    if (viewInd) viewInd.classList.toggle("hidden", !isInd);
     if (isDiario) {
       var store = loadStore();
       var dateKey = ensureToday(store);
       saveStore(store);
       renderList(store, dateKey);
       updateCounter(store, dateKey);
-    } else {
+    } else if (isBuzon) {
       renderBuzon();
       updateCounterForMode();
+    } else {
+      renderIndicadores();
+      document.getElementById("contador").textContent = "Indicadores";
     }
+  }
+
+  function makeDiarioRow(day, num, names, emojis) {
+    var task = day.tasks[String(num)] || { hecha: false, hora: null };
+    var row = document.createElement("div");
+    row.className = "row" + (task.hecha ? " done" : "");
+    row.setAttribute("role", "listitem");
+    row.setAttribute("data-num", String(num));
+    row.setAttribute("aria-pressed", task.hecha ? "true" : "false");
+
+    var sw = document.createElement("div");
+    sw.className = "switch";
+    sw.setAttribute("aria-hidden", "true");
+
+    var emoji = document.createElement("span");
+    emoji.className = "diario-emoji";
+    emoji.setAttribute("aria-hidden", "true");
+    emoji.textContent = emojis[num - 1] || "";
+
+    var label = document.createElement("div");
+    label.className = "label";
+    label.textContent = num + ". " + (names[num - 1] || "");
+
+    var check = document.createElement("div");
+    check.className = "check";
+    check.textContent = "✓";
+
+    row.appendChild(sw);
+    row.appendChild(emoji);
+    row.appendChild(label);
+    row.appendChild(check);
+
+    row.addEventListener("click", (function (n) {
+      return function () { toggleTask(n); };
+    })(num));
+    return row;
+  }
+
+  function appendBloque(lista, titulo) {
+    var el = document.createElement("div");
+    el.className = "bloque-title";
+    el.textContent = titulo;
+    lista.appendChild(el);
   }
 
   function renderList(store, dateKey) {
     var lista = document.getElementById("lista");
     lista.innerHTML = "";
-    var start = currentGroup * 10;
     var day = store.days[dateKey];
-    for (var i = 0; i < 10; i++) {
-      var num = start + i + 1;
-      var task = day.tasks[String(num)];
-      var row = document.createElement("div");
-      row.className = "row" + (task.hecha ? " done" : "");
-      row.setAttribute("role", "listitem");
-      row.setAttribute("data-num", String(num));
-      row.setAttribute("aria-pressed", task.hecha ? "true" : "false");
-
-      var sw = document.createElement("div");
-      sw.className = "switch";
-      sw.setAttribute("aria-hidden", "true");
-
-      var emoji = document.createElement("span");
-      emoji.className = "diario-emoji";
-      emoji.setAttribute("aria-hidden", "true");
-      emoji.textContent = TASK_EMOJIS[num - 1] || "";
-
-      var label = document.createElement("div");
-      label.className = "label";
-      label.textContent = num + ". " + TASKS[num - 1];
-
-      var check = document.createElement("div");
-      check.className = "check";
-      check.textContent = "✓";
-
-      row.appendChild(sw);
-      row.appendChild(emoji);
-      row.appendChild(label);
-      row.appendChild(check);
-
-      row.addEventListener("click", (function (n) {
-        return function () { toggleTask(n); };
-      })(num));
-
-      lista.appendChild(row);
+    var tabs = document.getElementById("diarioTabs");
+    if (isV13Day(day)) {
+      if (tabs) tabs.classList.add("hidden");
+      var names = TASKS_V13;
+      var emojis = TASK_EMOJIS_V13;
+      var btnM = document.createElement("button");
+      btnM.type = "button";
+      btnM.className = "btn-completar-manana";
+      btnM.id = "btnCompletarManana";
+      btnM.textContent = "Completar Mañana";
+      btnM.addEventListener("click", completarManana);
+      lista.appendChild(btnM);
+      appendBloque(lista, "Mañana");
+      for (var a = 1; a <= 7; a++) lista.appendChild(makeDiarioRow(day, a, names, emojis));
+      appendBloque(lista, "Tarde");
+      for (var b = 8; b <= 12; b++) lista.appendChild(makeDiarioRow(day, b, names, emojis));
+      appendBloque(lista, "Noche");
+      for (var c = 13; c <= 16; c++) lista.appendChild(makeDiarioRow(day, c, names, emojis));
+      var tog = document.createElement("button");
+      tog.type = "button";
+      tog.className = "cultivo-toggle" + (store.cultivoAbierto ? " open" : "");
+      tog.setAttribute("aria-expanded", store.cultivoAbierto ? "true" : "false");
+      tog.innerHTML = '<span>Cultivo y Vínculos (Opcional)</span><span class="chev">›</span>';
+      tog.addEventListener("click", function () {
+        var st = loadStore();
+        st.cultivoAbierto = !st.cultivoAbierto;
+        saveStore(st);
+        var key = ensureToday(st);
+        renderList(st, key);
+        updateCounter(st, key);
+      });
+      lista.appendChild(tog);
+      var body = document.createElement("div");
+      body.className = "cultivo-body" + (store.cultivoAbierto ? "" : " collapsed");
+      for (var d = 17; d <= 22; d++) body.appendChild(makeDiarioRow(day, d, names, emojis));
+      lista.appendChild(body);
+    } else {
+      if (tabs) tabs.classList.remove("hidden");
+      var avisoV = document.createElement("p");
+      avisoV.className = "hint-dia-viejo";
+      avisoV.textContent = "Este día se guardó con las 30 tareas anteriores. Desde mañana el diario tendrá 16 esenciales.";
+      lista.appendChild(avisoV);
+      var start = currentGroup * 10;
+      for (var i = 0; i < 10; i++) {
+        lista.appendChild(makeDiarioRow(day, start + i + 1, TASKS, TASK_EMOJIS));
+      }
     }
+  }
+
+  function completarManana() {
+    var store = loadStore();
+    var dateKey = ensureToday(store);
+    var day = store.days[dateKey];
+    if (!isV13Day(day)) return;
+    var hora = nowTime();
+    var marked = 0;
+    for (var n = 1; n <= 7; n++) {
+      var t = day.tasks[String(n)];
+      if (!t) {
+        t = { hecha: false, hora: null };
+        day.tasks[String(n)] = t;
+      }
+      if (t.hecha) continue;
+      t.hecha = true;
+      t.hora = hora;
+      store.events.push({
+        fecha: dateKey,
+        tarea_numero: n,
+        accion: "marcar",
+        hora: hora,
+        timestamp: new Date().toISOString()
+      });
+      marked++;
+    }
+    if (!marked) return;
+    saveStore(store);
+    for (var m = 1; m <= 7; m++) {
+      var row = document.querySelector('#lista .row[data-num="' + m + '"]');
+      if (row && day.tasks[String(m)] && day.tasks[String(m)].hecha) {
+        row.classList.add("done");
+        row.setAttribute("aria-pressed", "true");
+        burstStars(row);
+      }
+    }
+    playMark();
+    updateCounter(store, dateKey);
   }
 
   function toggleTask(num) {
@@ -1558,7 +1953,22 @@
   function countAgenda(data) {
     var n = 0;
     for (var i = 0; i < data.items.length; i++) {
-      if (!data.items[i].hecha && validFecha(data.items[i].fecha)) n++;
+      if (!data.items[i].hecha && validFecha(data.items[i].fecha) && !isCongelado(data.items[i])) n++;
+    }
+    return n;
+  }
+
+  function isCongelado(item) {
+    if (!item || item.hecha) return false;
+    if (!validFecha(item.fecha)) return false;
+    var cutoff = isoAddDays(todayKey(), -7);
+    return item.fecha < cutoff;
+  }
+
+  function countCongelado(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      if (isCongelado(data.items[i])) n++;
     }
     return n;
   }
@@ -1566,6 +1976,7 @@
   function belongsInHoyVista(item, keepLeavingId) {
     if (!item) return false;
     if (item.hecha && item.id !== keepLeavingId) return false;
+    if (isCongelado(item) && item.id !== keepLeavingId) return false;
     if (item.nivel === "hoy") return true;
     var st = fechaStatus(item.fecha);
     return st === "hoy" || st === "vencido";
@@ -1577,6 +1988,25 @@
       if (belongsInHoyVista(data.items[i])) n++;
     }
     return n;
+  }
+
+  function countHoyManual(data) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      var it = data.items[i];
+      if (!it.hecha && it.nivel === "hoy" && !isCongelado(it)) n++;
+    }
+    return n;
+  }
+
+  function hayHoyManualDeMeta(data, meta, exceptId) {
+    if (!metaValida(meta)) return false;
+    for (var i = 0; i < data.items.length; i++) {
+      var it = data.items[i];
+      if (it.id === exceptId) continue;
+      if (!it.hecha && it.nivel === "hoy" && !isCongelado(it) && it.meta === meta) return true;
+    }
+    return false;
   }
 
   function compareHoyVista(a, b, data) {
@@ -1611,10 +2041,10 @@
   }
 
   function labelMeta(meta) {
-    if (meta === "dinero") return "Dinero";
-    if (meta === "salud") return "Salud";
-    if (meta === "orden") return "Orden";
-    if (meta === "ninguna") return "Ninguna (pero toca)";
+    if (meta === "salud_cuerpo") return "Salud y Cuerpo";
+    if (meta === "compromisos") return "Compromisos Actuales";
+    if (meta === "escalables") return "Apuestas Escalables";
+    if (meta === "hogar") return "Hogar y Trámites";
     return "";
   }
 
@@ -1666,7 +2096,8 @@
       ["agenda", "vistaAgenda"],
       ["hoy", "vistaHoy"],
       ["semana", "vistaSemana"],
-      ["completo", "vistaCompleto"]
+      ["completo", "vistaCompleto"],
+      ["congelado", "vistaCongelado"]
     ];
     for (var i = 0; i < vistas.length; i++) {
       var btn = document.getElementById(vistas[i][1]);
@@ -1679,7 +2110,10 @@
     var semN = countNivel(data, "semana");
     var tot = countBuzonPending(data);
     var agN = countAgenda(data);
-    document.getElementById("resumenBuzon").textContent = "Agenda " + agN + " · Hoy " + hoyN + " · Semana " + semN + "/15 · Buzón " + tot;
+    var congN = countCongelado(data);
+    document.getElementById("resumenBuzon").textContent = "Agenda " + agN + " · Hoy " + hoyN + " · Semana " + semN + "/15 · Buzón " + tot + " · Congelado " + congN;
+    var congBtn = document.getElementById("vistaCongelado");
+    if (congBtn) congBtn.textContent = "Congelado (" + congN + ")";
     var filtros = document.getElementById("metaFiltros");
     filtros.classList.toggle("hidden", buzonVista !== "completo");
     var chips = filtros.querySelectorAll("button");
@@ -1874,6 +2308,7 @@
       for (var ai = 0; ai < data.items.length; ai++) {
         var ag = data.items[ai];
         if (ag.hecha && ag.id !== keepLeavingId) continue;
+        if (isCongelado(ag) && ag.id !== keepLeavingId) continue;
         if (!validFecha(ag.fecha) && ag.id !== keepLeavingId) continue;
         if (!matchesFiltros(ag) && ag.id !== keepLeavingId) continue;
         if (validFecha(ag.fecha) || ag.id === keepLeavingId) agItems.push(ag);
@@ -1892,54 +2327,74 @@
         ? "1 pendiente sin fecha en el buzón"
         : nSin + " pendientes sin fecha en el buzón";
       lista.appendChild(note);
+      var nCong = countCongelado(data);
+      if (nCong) {
+        var noteC = document.createElement("p");
+        noteC.className = "sin-fecha-note";
+        noteC.textContent = nCong === 1
+          ? "1 pendiente en Congelado no se muestra aquí"
+          : nCong + " pendientes en Congelado no se muestran aquí";
+        lista.appendChild(noteC);
+      }
     } else if (buzonVista === "completo") {
       addOpenGroup("Con fecha", "con_fecha");
       addOpenGroup("Sin fecha", "sin_fecha");
     } else if (buzonVista === "hoy") {
-      var hoyItems = [];
+      var prioridades = [];
+      var fechadasHoy = [];
+      var vencidosHoy = [];
       for (var hi = 0; hi < data.items.length; hi++) {
-        if (belongsInHoyVista(data.items[hi], keepLeavingId)) hoyItems.push(data.items[hi]);
+        var hit = data.items[hi];
+        if (hit.hecha && hit.id !== keepLeavingId) continue;
+        if (isCongelado(hit) && hit.id !== keepLeavingId) continue;
+        if (hit.nivel === "hoy") {
+          prioridades.push(hit);
+          continue;
+        }
+        var hst = fechaStatus(hit.fecha);
+        if (hst === "hoy") fechadasHoy.push(hit);
+        else if (hst === "vencido") vencidosHoy.push(hit);
       }
-      hoyItems.sort(function (a, b) { return compareHoyVista(a, b, data); });
-      if (!hoyItems.length) {
+      prioridades.sort(function (a, b) { return compareHoyVista(a, b, data); });
+      fechadasHoy.sort(function (a, b) { return compareEnDia(a, b, data); });
+      vencidosHoy.sort(function (a, b) { return compareHoyVista(a, b, data); });
+      if (!prioridades.length && !fechadasHoy.length && !vencidosHoy.length) {
         var emptyHoy = document.createElement("p");
         emptyHoy.className = "hint";
-        emptyHoy.textContent = "No hay pendientes para hoy. Aquí salen los de hoy, los vencidos y hasta 3 que muevas a mano desde el Buzón completo.";
+        emptyHoy.textContent = "No hay prioridades ni pendientes con fecha de hoy. Mueve hasta 3 al Hoy (1 por categoría). Las vencidas de más de 7 días están en Congelado.";
         lista.appendChild(emptyHoy);
       } else {
-        if (hoyItems.length > 3) {
-          var avisoHoy = document.createElement("p");
-          avisoHoy.className = "aviso";
-          avisoHoy.setAttribute("role", "status");
-          avisoHoy.textContent = "Hoy tienes " + hoyItems.length + " cosas. Elige las 3 más importantes y mueve el resto a otro día.";
-          lista.appendChild(avisoHoy);
+        if (prioridades.length) {
+          appendDayTitle("Prioridades de hoy");
+          appendItems(prioridades);
         }
-        var vencidosHoy = [];
-        var hoyDia = [];
-        var sinFechaHoy = [];
-        var otraFechaHoy = [];
-        for (var hj = 0; hj < hoyItems.length; hj++) {
-          var hst = fechaStatus(hoyItems[hj].fecha);
-          if (hst === "vencido") vencidosHoy.push(hoyItems[hj]);
-          else if (hst === "hoy") hoyDia.push(hoyItems[hj]);
-          else if (!validFecha(hoyItems[hj].fecha)) sinFechaHoy.push(hoyItems[hj]);
-          else otraFechaHoy.push(hoyItems[hj]);
+        if (fechadasHoy.length) {
+          appendDayTitle("Fechadas para hoy");
+          appendItems(fechadasHoy);
         }
         if (vencidosHoy.length) {
           appendDayTitle("Vencidos", "vencidos");
           appendItems(vencidosHoy);
         }
-        if (hoyDia.length) {
-          appendDayTitle("Hoy");
-          appendItems(hoyDia);
-        }
-        if (sinFechaHoy.length) {
-          appendDayTitle("Sin fecha");
-          appendItems(sinFechaHoy);
-        }
-        if (otraFechaHoy.length) {
-          appendDayTitle("Otra fecha");
-          appendItems(otraFechaHoy);
+      }
+    } else if (buzonVista === "congelado") {
+      var congItems = [];
+      for (var ci = 0; ci < data.items.length; ci++) {
+        if (isCongelado(data.items[ci])) congItems.push(data.items[ci]);
+      }
+      congItems.sort(function (a, b) {
+        if (a.fecha !== b.fecha) return a.fecha < b.fecha ? -1 : 1;
+        return compareEnDia(a, b, data);
+      });
+      if (!congItems.length) {
+        var emptyC = document.createElement("p");
+        emptyC.className = "hint";
+        emptyC.textContent = "No hay pendientes congelados. Aquí aparecen los que tienen más de 7 días de vencidos.";
+        lista.appendChild(emptyC);
+      } else {
+        appendDayTitle("Congelado", "vencidos");
+        for (var cj = 0; cj < congItems.length; cj++) {
+          lista.appendChild(makeBuzonCard(congItems[cj], itemNumber(data, congItems[cj]), { inCongelado: true }));
         }
       }
     } else {
@@ -1962,10 +2417,12 @@
     }
 
     var hechos = [];
+    if (buzonVista !== "congelado") {
     for (var h = 0; h < data.items.length; h++) {
       if (data.items[h].hecha && data.items[h].id !== keepLeavingId) {
         hechos.push(data.items[h]);
       }
+    }
     }
 
     if (hechos.length) {
@@ -2028,6 +2485,28 @@
       if (item.nivel !== "semana") addMove("→ Semana", "semana", "Mover a esta semana");
       if (item.nivel !== "hoy") addMove("→ Hoy", "hoy", "Mover a Hoy");
       if (item.nivel !== "buzon") addMove("Sacar", "buzon", "Sacar al buzón");
+      if (opts.inCongelado) {
+        var btnF = document.createElement("button");
+        btnF.type = "button";
+        btnF.className = "btn-nivel";
+        btnF.textContent = "Nueva fecha";
+        btnF.setAttribute("aria-label", "Descongelar con una fecha nueva");
+        btnF.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          descongelarConFecha(item.id);
+        });
+        actions.appendChild(btnF);
+        var btnQ = document.createElement("button");
+        btnQ.type = "button";
+        btnQ.className = "btn-nivel";
+        btnQ.textContent = "Quitar fecha";
+        btnQ.setAttribute("aria-label", "Descongelar y dejar sin fecha");
+        btnQ.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          descongelarItem(item.id, "");
+        });
+        actions.appendChild(btnQ);
+      }
       if (actions.childNodes.length) card.appendChild(actions);
     }
     return card;
@@ -2074,17 +2553,18 @@
         chips.appendChild(tchip);
         hasChip = true;
       }
-      if (item.meta === "dinero" || item.meta === "salud" || item.meta === "orden") {
+      if (metaValida(item.meta)) {
         var mchip = document.createElement("span");
         mchip.className = "chip chip-meta";
-        mchip.textContent = (item.meta === "dinero" ? "💰 " : item.meta === "salud" ? "❤️ " : "🧹 ") + labelMeta(item.meta);
+        mchip.textContent = iconMeta(item.meta) + " " + labelMeta(item.meta);
         chips.appendChild(mchip);
         hasChip = true;
-      } else if (item.meta === "ninguna") {
-        var nchip = document.createElement("span");
-        nchip.className = "chip chip-meta";
-        nchip.textContent = "Ninguna (pero toca)";
-        chips.appendChild(nchip);
+      }
+      if (isCongelado(item) && buzonVista === "completo") {
+        var zchip = document.createElement("span");
+        zchip.className = "chip chip-nivel";
+        zchip.textContent = "Congelado";
+        chips.appendChild(zchip);
         hasChip = true;
       }
       if (buzonVista === "completo" && (item.nivel === "hoy" || item.nivel === "semana")) {
@@ -2254,12 +2734,14 @@
     var item = findBuzonItem(data, id);
     if (!item || item.hecha) return;
     if (item.nivel === dest) return;
-    var caps = { hoy: 3, semana: 15 };
-    if (dest === "hoy" || dest === "semana") {
-      if (countNivel(data, dest) >= caps[dest]) {
-        showAviso(dest === "hoy"
-          ? "Hoy ya tiene 3. Termina uno o sácalo primero."
-          : "Esta semana ya tiene 15. Termina uno o sácalo primero.");
+    if (dest === "hoy") {
+      if (countHoyManual(data) >= 3 || hayHoyManualDeMeta(data, item.meta, item.id)) {
+        showAviso("Límite alcanzado: máximo 3 prioridades en Hoy (1 por categoría). Completa o saca una primero.");
+        return;
+      }
+    } else if (dest === "semana") {
+      if (countNivel(data, "semana") >= 15) {
+        showAviso("Esta semana ya tiene 15. Termina uno o sácalo primero.");
         return;
       }
     }
@@ -2267,6 +2749,41 @@
     saveBuzon(data);
     clearAviso();
     renderBuzon();
+  }
+
+  function descongelarItem(id, fecha) {
+    var data = loadBuzon();
+    var item = findBuzonItem(data, id);
+    if (!item) return;
+    if (fecha && validFecha(fecha)) {
+      item.fecha = fecha;
+      item.grupo = "con_fecha";
+    } else {
+      item.fecha = null;
+      item.grupo = "sin_fecha";
+    }
+    saveBuzon(data);
+    renderBuzon();
+  }
+
+  function descongelarConFecha(id) {
+    var picker = document.getElementById("inputFechaItem");
+    if (!picker) return;
+    picker.value = "";
+    picker.setAttribute("data-descongelar-id", id);
+    function apply() {
+      picker.removeEventListener("change", onChange);
+      var editId = picker.getAttribute("data-descongelar-id");
+      picker.removeAttribute("data-descongelar-id");
+      if (!editId) return;
+      descongelarItem(editId, picker.value || "");
+    }
+    function onChange() { apply(); }
+    picker.addEventListener("change", onChange);
+    picker.focus();
+    if (typeof picker.showPicker === "function") {
+      try { picker.showPicker(); } catch (e) { /* headless or unsupported */ }
+    }
   }
 
   function setChoiceGroup(el, val) {
@@ -2326,7 +2843,7 @@
     var tipo = document.getElementById("editorTipo").getAttribute("data-selected") || "";
     item.tipo = tipoValido(tipo) ? tipo : "";
     var meta = document.getElementById("editorMeta").getAttribute("data-selected") || "";
-    item.meta = (meta === "dinero" || meta === "salud" || meta === "orden" || meta === "ninguna") ? meta : "";
+    item.meta = metaValida(meta) ? meta : "";
     item.que_pasa = (document.getElementById("editorQuePasa").value || "").trim();
     var fecha = document.getElementById("editorFecha").value || "";
     if (fecha && validFecha(fecha)) {
@@ -2362,7 +2879,7 @@
     if (!(cons >= 0 && cons <= 3)) cons = 0;
     var addMeta = document.getElementById("addMeta");
     var meta = (addMeta && addMeta.getAttribute("data-selected")) || "";
-    if (meta !== "dinero" && meta !== "salud" && meta !== "orden" && meta !== "ninguna") meta = "";
+    if (!metaValida(meta)) meta = "";
     var data = loadBuzon();
     var id = "c" + data.nextCustomId;
     data.nextCustomId += 1;
@@ -2480,12 +2997,13 @@
     for (var d = 0; d < dates.length; d++) {
       var fecha = dates[d];
       var day = store.days[fecha];
-      for (var i = 1; i <= 30; i++) {
-        var t = day.tasks[String(i)] || { hecha: false, hora: null };
+      var names = tasksForDay(day);
+      for (var i = 1; i <= names.length; i++) {
+        var t = (day.tasks && day.tasks[String(i)]) || { hecha: false, hora: null };
         lines.push([
           csvEscape(fecha),
           csvEscape(i),
-          csvEscape(TASKS[i - 1]),
+          csvEscape(names[i - 1]),
           csvEscape(t.hecha ? "hecha" : "no hecha"),
           csvEscape(t.hora || "")
         ].join(","));
@@ -2591,6 +3109,234 @@
     }, 500);
   }
 
+  function isoInLastDays(iso, days) {
+    if (!validFecha(iso)) return false;
+    var start = isoAddDays(todayKey(), -(days - 1));
+    var today = todayKey();
+    return iso >= start && iso <= today;
+  }
+
+  function cumplimientoDeDia(day) {
+    if (!day || !day.tasks) return null;
+    if (isV13Day(day)) {
+      return countDone(day) / 16;
+    }
+    var n = 0;
+    var max = 30;
+    for (var i = 1; i <= max; i++) {
+      if (day.tasks[String(i)] && day.tasks[String(i)].hecha) n++;
+    }
+    return n / max;
+  }
+
+  function diaOrganizacion(day) {
+    if (!day || !day.tasks) return false;
+    if (isV13Day(day)) {
+      return !!(day.tasks["10"] && day.tasks["10"].hecha);
+    }
+    return !!(day.tasks["25"] && day.tasks["25"].hecha);
+  }
+
+  function countCerradasMeta(data, meta, days) {
+    var n = 0;
+    for (var i = 0; i < data.items.length; i++) {
+      var it = data.items[i];
+      if (!it.hecha) continue;
+      if (it.meta !== meta) continue;
+      if (isoInLastDays(it.fecha_hecho, days)) n++;
+    }
+    return n;
+  }
+
+  function renderIndicadores() {
+    var store = loadStore();
+    ensureToday(store);
+    saveStore(store);
+    var data = loadBuzon();
+    var today = todayKey();
+    var sum = 0;
+    var dias = 0;
+    var org = 0;
+    for (var d = 0; d < 7; d++) {
+      var key = isoAddDays(today, -d);
+      var day = store.days[key];
+      var c = cumplimientoDeDia(day);
+      if (c != null) {
+        sum += c;
+        dias++;
+      } else if (key === today) {
+        sum += 0;
+        dias++;
+      }
+      if (diaOrganizacion(day)) org++;
+    }
+    var pct = dias ? Math.round((sum / dias) * 100) : 0;
+    var esc = countCerradasMeta(data, "escalables", 7);
+    var com = countCerradasMeta(data, "compromisos", 7);
+    var hog = countCerradasMeta(data, "hogar", 7);
+    var bars = [
+      ["% Cumplimiento Diario (16 ítems)", pct + "%", Math.min(100, pct)],
+      ["Apuestas Escalables cerradas (meta 3/sem)", esc + " / 3", Math.min(100, Math.round((esc / 3) * 100))],
+      ["Compromisos Actuales cerrados", String(com), Math.min(100, Math.round((com / 5) * 100))],
+      ["Días de Organización Estructural", org + " de 7", Math.min(100, Math.round((org / 7) * 100))]
+    ];
+    var box = document.getElementById("indBarras");
+    box.innerHTML = "";
+    for (var b = 0; b < bars.length; b++) {
+      var row = document.createElement("div");
+      row.className = "ind-row";
+      var lab = document.createElement("div");
+      lab.className = "ind-lab";
+      var t1 = document.createElement("span");
+      t1.textContent = bars[b][0];
+      var t2 = document.createElement("span");
+      t2.textContent = bars[b][1];
+      lab.appendChild(t1);
+      lab.appendChild(t2);
+      var bar = document.createElement("div");
+      bar.className = "ind-bar";
+      var fill = document.createElement("div");
+      fill.className = "ind-bar-fill";
+      fill.style.width = bars[b][2] + "%";
+      bar.appendChild(fill);
+      row.appendChild(lab);
+      row.appendChild(bar);
+      box.appendChild(row);
+    }
+    var alerta = document.getElementById("indAlerta");
+    if (hog >= 5 && esc === 0) {
+      alerta.textContent = "Alerta de desviación: estás resolviendo logística doméstica sin mover proyectos escalables.";
+      alerta.classList.remove("hidden");
+    } else {
+      alerta.textContent = "";
+      alerta.classList.add("hidden");
+    }
+    renderBitacora();
+  }
+
+  function weekMonday(iso) {
+    return isoAddDays(iso, 1 - isoWeekdayMon1(iso));
+  }
+
+  function formatSemanaRango(lunes) {
+    var domingo = isoAddDays(lunes, 6);
+    function corto(iso) {
+      var p = iso.split("-");
+      return Number(p[2]) + " " + ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][Number(p[1]) - 1];
+    }
+    return corto(lunes) + " – " + corto(domingo);
+  }
+
+  function loadBitacora() {
+    try {
+      var raw = localStorage.getItem(BITACORA_KEY);
+      if (!raw) return { semanas: {} };
+      var data = JSON.parse(raw);
+      if (!data.semanas || typeof data.semanas !== "object") data.semanas = {};
+      return data;
+    } catch (e) {
+      return { semanas: {} };
+    }
+  }
+
+  function saveBitacora(data) {
+    localStorage.setItem(BITACORA_KEY, JSON.stringify(data));
+  }
+
+  function bitacoraCampos() {
+    return [
+      ["grasa", "bitGrasa"],
+      ["perimetro", "bitPerimetro"],
+      ["diasSinDolor", "bitDolor"],
+      ["saldo", "bitSaldo"],
+      ["piezas", "bitPiezas"],
+      ["cajas", "bitCajas"]
+    ];
+  }
+
+  function renderBitacora() {
+    var lunes = weekMonday(todayKey());
+    document.getElementById("bitacoraSemanaLabel").textContent = "Semana del " + formatSemanaRango(lunes);
+    var data = loadBitacora();
+    var cur = data.semanas[lunes] || {};
+    var campos = bitacoraCampos();
+    for (var i = 0; i < campos.length; i++) {
+      var el = document.getElementById(campos[i][1]);
+      if (el) el.value = cur[campos[i][0]] != null ? String(cur[campos[i][0]]) : "";
+    }
+    var headers = ["Semana", "% Grasa", "Perím. (cm)", "Días sin dolor", "Ahorro ($)", "Piezas", "Cajas"];
+    var keys = ["grasa", "perimetro", "diasSinDolor", "saldo", "piezas", "cajas"];
+    var tabla = document.getElementById("tablaBitacora");
+    tabla.innerHTML = "";
+    var thead = document.createElement("thead");
+    var hr = document.createElement("tr");
+    for (var h = 0; h < headers.length; h++) {
+      var th = document.createElement("th");
+      th.textContent = headers[h];
+      hr.appendChild(th);
+    }
+    thead.appendChild(hr);
+    tabla.appendChild(thead);
+    var tb = document.createElement("tbody");
+    for (var w = 0; w < 8; w++) {
+      var mon = isoAddDays(lunes, -7 * w);
+      var rec = data.semanas[mon] || {};
+      var tr = document.createElement("tr");
+      var td0 = document.createElement("td");
+      td0.textContent = formatSemanaRango(mon);
+      tr.appendChild(td0);
+      for (var k = 0; k < keys.length; k++) {
+        var td = document.createElement("td");
+        td.textContent = rec[keys[k]] != null && rec[keys[k]] !== "" ? String(rec[keys[k]]) : "—";
+        tr.appendChild(td);
+      }
+      tb.appendChild(tr);
+    }
+    tabla.appendChild(tb);
+  }
+
+  function guardarBitacora() {
+    var lunes = weekMonday(todayKey());
+    var data = loadBitacora();
+    var rec = {};
+    var campos = bitacoraCampos();
+    for (var i = 0; i < campos.length; i++) {
+      var el = document.getElementById(campos[i][1]);
+      rec[campos[i][0]] = el ? String(el.value || "").trim() : "";
+    }
+    data.semanas[lunes] = rec;
+    saveBitacora(data);
+    renderBitacora();
+  }
+
+  function exportBitacoraCsv() {
+    var data = loadBitacora();
+    var lunes = weekMonday(todayKey());
+    var lines = ["semana_inicio,semana_fin,grasa_corporal_pct,perimetro_abdominal_cm,dias_sin_dolor,saldo_ahorro,piezas_obra,cajas_exceso"];
+    var keys = Object.keys(data.semanas).sort();
+    if (!keys.length) {
+      keys = [lunes];
+    }
+    for (var i = 0; i < keys.length; i++) {
+      var mon = keys[i];
+      var rec = data.semanas[mon] || {};
+      lines.push([
+        csvEscape(mon),
+        csvEscape(isoAddDays(mon, 6)),
+        csvEscape(rec.grasa || ""),
+        csvEscape(rec.perimetro || ""),
+        csvEscape(rec.diasSinDolor || ""),
+        csvEscape(rec.saldo || ""),
+        csvEscape(rec.piezas || ""),
+        csvEscape(rec.cajas || "")
+      ].join(","));
+    }
+    var csv = "\uFEFF" + lines.join("\r\n");
+    var filename = "bitacora-resultados-" + todayKey() + ".csv";
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, filename);
+  }
+
   function resetToday() {
     if (!confirm("¿Empezar de nuevo el día de hoy? Se borran solo las marcas de hoy.")) return;
     var store = loadStore();
@@ -2618,6 +3364,8 @@
       if (currentMode === "diario") {
         renderList(store, key);
         updateCounter(store, key);
+      } else if (currentMode === "indicadores") {
+        renderIndicadores();
       }
     } else if (!store.days[key]) {
       ensureToday(store);
@@ -2630,8 +3378,9 @@
     var dateKey = ensureToday(store);
     saveStore(store);
     var bInit = loadBuzon();
-    if (bInit.vista === "agenda" || bInit.vista === "hoy" || bInit.vista === "semana" || bInit.vista === "completo") buzonVista = bInit.vista;
-    if (bInit.metaFiltro === "dinero" || bInit.metaFiltro === "salud" || bInit.metaFiltro === "orden") buzonMetaFiltro = bInit.metaFiltro;
+    if (bInit.vista === "agenda" || bInit.vista === "hoy" || bInit.vista === "semana" || bInit.vista === "completo" || bInit.vista === "congelado") buzonVista = bInit.vista;
+    if (metaValida(bInit.metaFiltro)) buzonMetaFiltro = bInit.metaFiltro;
+    saveBuzon(bInit);
     if (tipoValido(bInit.tipoFiltro)) buzonTipoFiltro = bInit.tipoFiltro;
     document.getElementById("fechaHoy").textContent = formatFechaES(dateKey);
     updateCounter(store, dateKey);
@@ -2639,6 +3388,7 @@
 
     document.getElementById("modeDiario").addEventListener("click", function () { setMode("diario"); });
     document.getElementById("modeBuzon").addEventListener("click", function () { setMode("buzon"); });
+    document.getElementById("modeIndicadores").addEventListener("click", function () { setMode("indicadores"); });
 
     var buttons = document.querySelectorAll("#viewDiario .tabs button");
     for (var i = 0; i < buttons.length; i++) {
@@ -2662,6 +3412,7 @@
     document.getElementById("vistaHoy").addEventListener("click", function () { setBuzonVista("hoy"); });
     document.getElementById("vistaSemana").addEventListener("click", function () { setBuzonVista("semana"); });
     document.getElementById("vistaCompleto").addEventListener("click", function () { setBuzonVista("completo"); });
+    document.getElementById("vistaCongelado").addEventListener("click", function () { setBuzonVista("congelado"); });
     var filtroBtns = document.querySelectorAll("#metaFiltros button");
     for (var f = 0; f < filtroBtns.length; f++) {
       filtroBtns[f].addEventListener("click", (function (btn) {
@@ -2695,6 +3446,8 @@
     wireChoices("addMeta", true);
     document.getElementById("editorGuardar").addEventListener("click", saveEditor);
     document.getElementById("editorCancelar").addEventListener("click", function () { closeEditor(false); });
+    document.getElementById("btnGuardarBitacora").addEventListener("click", guardarBitacora);
+    document.getElementById("btnExportarBitacora").addEventListener("click", exportBitacoraCsv);
 
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") refreshIfNewDay();
