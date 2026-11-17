@@ -295,6 +295,70 @@
         transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1);
       }
     }
+    .celebra-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 80;
+      overflow: hidden;
+    }
+    .celebra-star, .celebra-confeti {
+      position: absolute;
+      top: -12px;
+      color: var(--star);
+      text-shadow: 0 0 6px rgba(255, 200, 50, 0.7);
+      animation-name: celebra-fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      opacity: 0;
+    }
+    .celebra-confeti { text-shadow: none; }
+    @keyframes celebra-fall {
+      0% { opacity: 0; transform: translateY(0) rotate(0deg); }
+      8% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(110vh) rotate(220deg); }
+    }
+    .celebra-msg {
+      position: absolute;
+      left: 50%;
+      top: 28%;
+      transform: translate(-50%, -50%);
+      max-width: 90%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0.01em;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+      animation: celebra-msg 3.6s ease-out forwards;
+    }
+    @keyframes celebra-msg {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+      12% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+      22% { transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
+    .celebra-overlay.celebra-min .celebra-star,
+    .celebra-overlay.celebra-min .celebra-confeti { display: none; }
+    .celebra-overlay.celebra-min .celebra-msg {
+      animation: celebra-msg-min 2.2s ease-out forwards;
+    }
+    @keyframes celebra-msg-min {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .celebra-star, .celebra-confeti { display: none !important; }
+      .celebra-msg {
+        animation: celebra-msg-min 2.2s ease-out forwards;
+      }
+    }
     .add-box {
       margin-top: 10px;
     }
@@ -1542,6 +1606,136 @@
     }
   }
 
+  function rangoCompleto(day, from, to) {
+    if (!day || !day.tasks) return false;
+    for (var i = from; i <= to; i++) {
+      var t = day.tasks[String(i)];
+      if (!t || !t.hecha) return false;
+    }
+    return true;
+  }
+
+  function estadoCelebracion(day) {
+    if (!isV13Day(day)) {
+      return { manana: false, tarde: false, noche: false, dia: false };
+    }
+    return {
+      manana: rangoCompleto(day, 1, 7),
+      tarde: rangoCompleto(day, 8, 12),
+      noche: rangoCompleto(day, 13, 16),
+      dia: rangoCompleto(day, 1, 16)
+    };
+  }
+
+  function playTone(ctx, freq, when, dur, vol, type) {
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || "triangle";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, when);
+    gain.gain.exponentialRampToValueAtTime(vol, when + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(when);
+    osc.stop(when + dur + 0.04);
+  }
+
+  function playFanfare(kind) {
+    var ctx = getAudio();
+    if (!ctx) return;
+    var t0 = ctx.currentTime;
+    var notes;
+    if (kind === "day") {
+      notes = [
+        [523, 0, 0.2, 0.16],
+        [659, 0.12, 0.2, 0.16],
+        [784, 0.24, 0.22, 0.17],
+        [1047, 0.38, 0.32, 0.2],
+        [784, 0.78, 0.16, 0.14],
+        [1047, 0.94, 0.16, 0.15],
+        [1319, 1.1, 0.22, 0.18],
+        [1047, 1.5, 0.55, 0.14],
+        [1319, 1.55, 0.55, 0.12],
+        [1568, 1.6, 0.6, 0.12],
+        [1047, 2.25, 0.85, 0.14],
+        [1319, 2.3, 0.85, 0.13],
+        [1568, 2.35, 0.9, 0.12],
+        [2093, 2.45, 0.8, 0.1]
+      ];
+    } else {
+      notes = [
+        [784, 0, 0.16, 0.18],
+        [988, 0.1, 0.16, 0.18],
+        [1175, 0.2, 0.18, 0.2],
+        [1568, 0.34, 0.5, 0.22]
+      ];
+    }
+    for (var i = 0; i < notes.length; i++) {
+      var n = notes[i];
+      playTone(ctx, n[0], t0 + n[1], n[2], n[3], i === notes.length - 1 ? "triangle" : "square");
+    }
+  }
+
+  var celebraTimer = null;
+
+  function celebrateDiario(kind) {
+    if (celebraTimer) {
+      clearTimeout(celebraTimer);
+      celebraTimer = null;
+    }
+    var prev = document.getElementById("celebraOverlay");
+    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+    var reduce = false;
+    try {
+      reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) { /* ignore */ }
+    var overlay = document.createElement("div");
+    overlay.id = "celebraOverlay";
+    overlay.className = "celebra-overlay " + (kind === "day" ? "celebra-dia" : "celebra-bloque") + (reduce ? " celebra-min" : "");
+    overlay.setAttribute("aria-live", "polite");
+    if (kind === "day") {
+      var msg = document.createElement("div");
+      msg.className = "celebra-msg";
+      msg.textContent = "¡16 de 16! Día completo";
+      overlay.appendChild(msg);
+    }
+    if (!reduce) {
+      var count = kind === "day" ? 52 : 24;
+      var colors = ["#ffc832", "#ffe08a", "#ffffff", "#6ea8ff", "#3cb371", "#ff8a65"];
+      for (var i = 0; i < count; i++) {
+        var p = document.createElement("span");
+        var confeti = (i % 3 === 0);
+        p.className = confeti ? "celebra-confeti" : "celebra-star";
+        p.textContent = confeti ? "▮" : "✦";
+        p.style.left = (Math.random() * 100) + "%";
+        p.style.animationDelay = (Math.random() * (kind === "day" ? 1.1 : 0.45)) + "s";
+        p.style.animationDuration = ((kind === "day" ? 2.4 : 1.25) + Math.random() * 1.1) + "s";
+        p.style.fontSize = (11 + Math.random() * 16) + "px";
+        if (confeti) p.style.color = colors[i % colors.length];
+        overlay.appendChild(p);
+      }
+    }
+    document.body.appendChild(overlay);
+    playFanfare(kind);
+    var ms = reduce ? (kind === "day" ? 2300 : 900) : (kind === "day" ? 4000 : 2000);
+    celebraTimer = setTimeout(function () {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      celebraTimer = null;
+    }, ms);
+  }
+
+  function maybeCelebrate(before, after) {
+    if (!before || !after) return;
+    if (!before.dia && after.dia) {
+      celebrateDiario("day");
+      return;
+    }
+    if ((!before.manana && after.manana) || (!before.tarde && after.tarde) || (!before.noche && after.noche)) {
+      celebrateDiario("block");
+    }
+  }
+
   function burstStars(rowEl) {
     var wrap = document.createElement("div");
     wrap.className = "stars";
@@ -1750,6 +1944,7 @@
     var dateKey = ensureToday(store);
     var day = store.days[dateKey];
     if (!isV13Day(day)) return;
+    var before = estadoCelebracion(day);
     var hora = nowTime();
     var marked = 0;
     for (var n = 1; n <= 7; n++) {
@@ -1780,14 +1975,23 @@
         burstStars(row);
       }
     }
-    playMark();
+    var after = estadoCelebracion(day);
+    if (after.dia && !before.dia) {
+      maybeCelebrate(before, after);
+    } else if (after.manana && !before.manana) {
+      maybeCelebrate(before, after);
+    } else {
+      playMark();
+    }
     updateCounter(store, dateKey);
   }
 
   function toggleTask(num) {
     var store = loadStore();
     var dateKey = ensureToday(store);
-    var t = store.days[dateKey].tasks[String(num)];
+    var day = store.days[dateKey];
+    var t = day.tasks[String(num)];
+    var before = estadoCelebracion(day);
     var wasDone = !!t.hecha;
     t.hecha = !wasDone;
     t.hora = t.hecha ? nowTime() : null;
@@ -1806,7 +2010,12 @@
         row.classList.add("done");
         row.setAttribute("aria-pressed", "true");
         burstStars(row);
-        playMark();
+        var after = estadoCelebracion(day);
+        if ((after.manana && !before.manana) || (after.tarde && !before.tarde) || (after.noche && !before.noche) || (after.dia && !before.dia)) {
+          maybeCelebrate(before, after);
+        } else {
+          playMark();
+        }
       } else {
         row.classList.remove("done");
         row.setAttribute("aria-pressed", "false");
