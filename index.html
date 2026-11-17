@@ -637,6 +637,14 @@
     .hoy-collapse.vencidos { color: var(--danger); }
     .hoy-collapse .chev { transition: transform 0.2s ease; color: var(--muted); }
     .hoy-collapse.open .chev { transform: rotate(90deg); }
+    .hoy-mas {
+      margin: 10px 4px 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
+    }
     .meta-filtros button {
       min-width: 44px;
       height: 36px;
@@ -697,6 +705,11 @@
     }
     .chip-meta { background: var(--tab-bg); color: var(--text); font-weight: 700; }
     .chip-nivel { background: var(--btn-secondary); color: var(--muted); font-weight: 700; }
+    .chip-sobrecarga {
+      background: #fde8c8;
+      color: #8a3b00;
+      font-weight: 800;
+    }
     .que-pasa {
       margin-top: 3px;
       font-size: 0.78rem;
@@ -840,6 +853,7 @@
       .chip-leve { background: #4a3b10; color: #ffe08a; }
       .chip-seria { background: #4a2a10; color: #ffc48a; }
       .chip-grave { background: #4a181c; color: #ffb3b8; }
+      .chip-sobrecarga { background: #4a3210; color: #ffc56e; }
       .row.cons-grave { background: #3a1c20; }
       .chip-tipo { background: #2a3348; color: var(--text); }
     }
@@ -1306,6 +1320,7 @@
   var buzonMetaFiltro = "";
   var buzonTipoFiltro = "";
   var editingId = null;
+  var buzonSobrecargaIds = {};
   var avisoTimer = null;
 
   function bogotaParts(date) {
@@ -2146,6 +2161,33 @@
     return (n >= 0 && n <= 3) ? n : 0;
   }
 
+  function comparePorConsecuenciaDia(a, b, data) {
+    var c = consecuenciaDe(b) - consecuenciaDe(a);
+    if (c) return c;
+    if (validFecha(a.fecha) && validFecha(b.fecha) && a.fecha !== b.fecha) return a.fecha < b.fecha ? -1 : 1;
+    return compareEnDia(a, b, data);
+  }
+
+  function buildSobrecargaIds(data) {
+    var ids = {};
+    var byFecha = {};
+    if (!data || !data.items) return ids;
+    for (var i = 0; i < data.items.length; i++) {
+      var it = data.items[i];
+      if (!it || it.hecha || !validFecha(it.fecha)) continue;
+      if (!byFecha[it.fecha]) byFecha[it.fecha] = [];
+      byFecha[it.fecha].push(it);
+    }
+    var fechas = Object.keys(byFecha);
+    for (var f = 0; f < fechas.length; f++) {
+      var list = byFecha[fechas[f]];
+      if (list.length <= 3) continue;
+      list.sort(function (a, b) { return comparePorConsecuenciaDia(a, b, data); });
+      for (var j = 3; j < list.length; j++) ids[list[j].id] = true;
+    }
+    return ids;
+  }
+
   function esUrgenteFecha(item) {
     var st = fechaStatus(item.fecha);
     return st === "hoy" || st === "vencido";
@@ -2413,6 +2455,7 @@
     var keepLeavingId = options.keepLeavingId || null;
     var reopenEditor = editingId;
     var data = loadBuzon();
+    buzonSobrecargaIds = buildSobrecargaIds(data);
     var lista = document.getElementById("listaBuzon");
     var editor = document.getElementById("editorBuzon");
     if (editor && editor.parentNode) {
@@ -2604,25 +2647,28 @@
         else if (hst === "vencido") vencidosHoy.push(hit);
       }
       prioridades.sort(function (a, b) { return compareHoyVista(a, b, data); });
-      fechadasHoy.sort(function (a, b) { return compareEnDia(a, b, data); });
-      vencidosHoy.sort(function (a, b) { return compareHoyVista(a, b, data); });
+      fechadasHoy.sort(function (a, b) { return comparePorConsecuenciaDia(a, b, data); });
+      vencidosHoy.sort(function (a, b) { return comparePorConsecuenciaDia(a, b, data); });
+      var colaHoy = prioridades.concat(fechadasHoy, vencidosHoy);
+      var visiblesHoy = colaHoy.slice(0, 3);
+      var restoHoy = colaHoy.length - visiblesHoy.length;
       var capHoy = document.createElement("p");
       capHoy.className = "day-title";
       capHoy.textContent = "Prioridades de hoy (" + countHoyManual(data) + " / 3)";
       lista.appendChild(capHoy);
-      if (!prioridades.length) {
+      if (!visiblesHoy.length) {
         var emptyHoy = document.createElement("p");
         emptyHoy.className = "hint";
         emptyHoy.textContent = "Hoy está vacío. Mueve hasta 3 pendientes desde el Buzón (1 por categoría).";
         lista.appendChild(emptyHoy);
       } else {
-        appendItems(prioridades);
+        appendItems(visiblesHoy);
       }
-      if (fechadasHoy.length) {
-        appendHoyCollapsible(data, "Fechadas para hoy", fechadasHoy, "hoyFechadasAbiertas", "");
-      }
-      if (vencidosHoy.length) {
-        appendHoyCollapsible(data, "Vencidos", vencidosHoy, "hoyVencidosAbiertos", "vencidos");
+      if (restoHoy > 0) {
+        var masHoy = document.createElement("p");
+        masHoy.className = "hoy-mas";
+        masHoy.textContent = "+" + restoHoy + " más en Agenda";
+        lista.appendChild(masHoy);
       }
     } else if (buzonVista === "congelado") {
       var congItems = [];
@@ -2819,6 +2865,13 @@
         vchip.className = "chip chip-nivel";
         vchip.textContent = labelNivel(item.nivel);
         chips.appendChild(vchip);
+        hasChip = true;
+      }
+      if (buzonSobrecargaIds && buzonSobrecargaIds[item.id]) {
+        var schip = document.createElement("span");
+        schip.className = "chip chip-sobrecarga";
+        schip.textContent = "alerta de sobrecarga";
+        chips.appendChild(schip);
         hasChip = true;
       }
       if (hasChip) wrap.appendChild(chips);
