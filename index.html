@@ -595,12 +595,48 @@
       color: var(--muted);
       text-align: center;
     }
+    .filtro-grupo {
+      margin: 0 0 8px;
+    }
+    .filtro-grupo + .filtro-grupo {
+      margin-top: 2px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .filtro-titulo {
+      margin: 0 0 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
     .meta-filtros {
       display: flex;
       gap: 6px;
       justify-content: center;
-      margin: -2px 0 8px;
+      margin: 0;
     }
+    .hoy-collapse {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      margin: 8px 0 4px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+    }
+    .hoy-collapse.vencidos { color: var(--danger); }
+    .hoy-collapse .chev { transition: transform 0.2s ease; color: var(--muted); }
+    .hoy-collapse.open .chev { transform: rotate(90deg); }
     .meta-filtros button {
       min-width: 44px;
       height: 36px;
@@ -997,18 +1033,23 @@
         <button type="button" id="vistaCompleto" data-vista="completo" class="active" role="tab" aria-selected="true">Buzón completo</button>
         <button type="button" id="vistaCongelado" data-vista="congelado" role="tab" aria-selected="false">Congelado</button>
       </div>
-      <p class="resumen" id="resumenBuzon">Agenda 0 · Hoy 0 · Semana 0/15 · Buzón 0</p>
-      <div class="meta-filtros" id="metaFiltros">
-        <button type="button" data-meta="salud_cuerpo" aria-label="Filtrar por Salud y Cuerpo">💪</button>
-        <button type="button" data-meta="compromisos" aria-label="Filtrar por Compromisos Actuales">📋</button>
-        <button type="button" data-meta="escalables" aria-label="Filtrar por Apuestas Escalables">🚀</button>
-        <button type="button" data-meta="hogar" aria-label="Filtrar por Hogar y Trámites">🏡</button>
+      <div class="filtro-grupo" id="filtroDireccion">
+        <p class="filtro-titulo">Dirección / Propósito</p>
+        <div class="meta-filtros" id="metaFiltros">
+          <button type="button" data-meta="salud_cuerpo" aria-label="Filtrar por Salud y Cuerpo">💪</button>
+          <button type="button" data-meta="compromisos" aria-label="Filtrar por Compromisos Actuales">📋</button>
+          <button type="button" data-meta="escalables" aria-label="Filtrar por Apuestas Escalables">🚀</button>
+          <button type="button" data-meta="hogar" aria-label="Filtrar por Hogar y Trámites">🏡</button>
+        </div>
       </div>
-      <div class="meta-filtros tipo-filtros" id="tipoFiltros">
-        <button type="button" data-tipo="fuera" aria-label="Filtrar por fuera de la casa">🚶</button>
-        <button type="button" data-tipo="casa" aria-label="Filtrar por en la casa">🏠</button>
-        <button type="button" data-tipo="computador" aria-label="Filtrar por computador">💻</button>
-        <button type="button" data-tipo="telefono" aria-label="Filtrar por teléfono">📞</button>
+      <div class="filtro-grupo" id="filtroLugar">
+        <p class="filtro-titulo">Lugar</p>
+        <div class="meta-filtros tipo-filtros" id="tipoFiltros">
+          <button type="button" data-tipo="fuera" aria-label="Filtrar por fuera de la casa">🚶</button>
+          <button type="button" data-tipo="casa" aria-label="Filtrar por en la casa">🏠</button>
+          <button type="button" data-tipo="computador" aria-label="Filtrar por computador">💻</button>
+          <button type="button" data-tipo="telefono" aria-label="Filtrar por teléfono">📞</button>
+        </div>
       </div>
       <p class="aviso hidden" id="buzonAviso" role="status"></p>
       <div class="list" id="listaBuzon" role="list"></div>
@@ -1443,7 +1484,7 @@
   function migrateMeta(meta) {
     if (meta === "salud") return "salud_cuerpo";
     if (meta === "orden") return "hogar";
-    if (meta === "dinero") return "compromisos";
+    if (meta === "dinero") return "";
     if (meta === "ninguna") return "";
     if (meta === "salud_cuerpo" || meta === "compromisos" || meta === "escalables" || meta === "hogar") return meta;
     return "";
@@ -1584,10 +1625,41 @@
       data.metaFiltro = migrateMeta(data.metaFiltro);
       if (!metaValida(data.metaFiltro)) data.metaFiltro = "";
       if (!tipoValido(data.tipoFiltro)) data.tipoFiltro = "";
+      if (applyV16BuzonMigrations(data)) saveBuzon(data);
       return data;
     } catch (e) {
       return defaultBuzon();
     }
+  }
+
+  function applyV16BuzonMigrations(data) {
+    if (!data) return false;
+    var changed = false;
+    if (!data.v16DeshizoDinero) {
+      function clearDineroMapeado(item) {
+        if (!item) return;
+        /* No se guardó la meta original. Compromisos Actuales en ítems
+           ya migrados por v13 solo puede venir del mapeo automático
+           dinero → compromisos, o de una clasificación manual posterior
+           que no se puede distinguir. Se deja en Ninguna una sola vez. */
+        if (item.meta === "dinero" || item.meta === "compromisos") item.meta = "";
+      }
+      for (var i = 0; i < data.items.length; i++) clearDineroMapeado(data.items[i]);
+      for (var d = 0; d < data.deletedRecords.length; d++) clearDineroMapeado(data.deletedRecords[d]);
+      if (data.metaFiltro === "compromisos") data.metaFiltro = "";
+      data.v16DeshizoDinero = true;
+      changed = true;
+    }
+    if (!data.v16LimpioHoy) {
+      for (var h = 0; h < data.items.length; h++) {
+        if (data.items[h] && data.items[h].nivel === "hoy") {
+          data.items[h].nivel = "buzon";
+        }
+      }
+      data.v16LimpioHoy = true;
+      changed = true;
+    }
+    return changed;
   }
 
   function saveBuzon(data) {
@@ -2265,23 +2337,23 @@
       btn.classList.toggle("active", on);
       btn.setAttribute("aria-selected", on ? "true" : "false");
     }
-    var hoyN = countHoyVista(data);
-    var semN = countNivel(data, "semana");
-    var tot = countBuzonPending(data);
-    var agN = countAgenda(data);
+    var hoyManual = countHoyManual(data);
     var congN = countCongelado(data);
-    document.getElementById("resumenBuzon").textContent = "Agenda " + agN + " · Hoy " + hoyN + " · Semana " + semN + "/15 · Buzón " + tot + " · Congelado " + congN;
+    var hoyBtn = document.getElementById("vistaHoy");
+    if (hoyBtn) hoyBtn.textContent = "Hoy (" + hoyManual + "/3)";
     var congBtn = document.getElementById("vistaCongelado");
     if (congBtn) congBtn.textContent = "Congelado (" + congN + ")";
+    var grupoDir = document.getElementById("filtroDireccion");
+    if (grupoDir) grupoDir.classList.toggle("hidden", buzonVista !== "completo");
     var filtros = document.getElementById("metaFiltros");
-    filtros.classList.toggle("hidden", buzonVista !== "completo");
-    var chips = filtros.querySelectorAll("button");
+    var chips = filtros ? filtros.querySelectorAll("button") : [];
     for (var c = 0; c < chips.length; c++) {
       chips[c].classList.toggle("active", chips[c].getAttribute("data-meta") === buzonMetaFiltro);
     }
+    var grupoLugar = document.getElementById("filtroLugar");
+    if (grupoLugar) grupoLugar.classList.toggle("hidden", buzonVista !== "completo" && buzonVista !== "agenda");
     var tipoFiltros = document.getElementById("tipoFiltros");
-    tipoFiltros.classList.toggle("hidden", buzonVista !== "completo" && buzonVista !== "agenda");
-    var tchips = tipoFiltros.querySelectorAll("button");
+    var tchips = tipoFiltros ? tipoFiltros.querySelectorAll("button") : [];
     for (var t = 0; t < tchips.length; t++) {
       tchips[t].classList.toggle("active", tchips[t].getAttribute("data-tipo") === buzonTipoFiltro);
     }
@@ -2354,6 +2426,23 @@
         var forceDone = items[j].id === keepLeavingId;
         lista.appendChild(makeBuzonCard(items[j], itemNumber(data, items[j]), { forceDoneLook: forceDone }));
       }
+    }
+
+    function appendHoyCollapsible(data, title, items, flagKey, extraClass) {
+      var open = !!(data && data[flagKey]);
+      var tog = document.createElement("button");
+      tog.type = "button";
+      tog.className = "hoy-collapse" + (extraClass ? " " + extraClass : "") + (open ? " open" : "");
+      tog.setAttribute("aria-expanded", open ? "true" : "false");
+      tog.innerHTML = "<span>" + title + " (" + items.length + ")</span><span class=\"chev\">›</span>";
+      tog.addEventListener("click", function () {
+        var st = loadBuzon();
+        st[flagKey] = !st[flagKey];
+        saveBuzon(st);
+        renderBuzon();
+      });
+      lista.appendChild(tog);
+      if (open) appendItems(items);
     }
 
     function appendDayTitle(title, extraClass) {
@@ -2517,24 +2606,23 @@
       prioridades.sort(function (a, b) { return compareHoyVista(a, b, data); });
       fechadasHoy.sort(function (a, b) { return compareEnDia(a, b, data); });
       vencidosHoy.sort(function (a, b) { return compareHoyVista(a, b, data); });
-      if (!prioridades.length && !fechadasHoy.length && !vencidosHoy.length) {
+      var capHoy = document.createElement("p");
+      capHoy.className = "day-title";
+      capHoy.textContent = "Prioridades de hoy (" + countHoyManual(data) + " / 3)";
+      lista.appendChild(capHoy);
+      if (!prioridades.length) {
         var emptyHoy = document.createElement("p");
         emptyHoy.className = "hint";
-        emptyHoy.textContent = "No hay prioridades ni pendientes con fecha de hoy. Mueve hasta 3 al Hoy (1 por categoría). Las vencidas de más de 7 días están en Congelado.";
+        emptyHoy.textContent = "Hoy está vacío. Mueve hasta 3 pendientes desde el Buzón (1 por categoría).";
         lista.appendChild(emptyHoy);
       } else {
-        if (prioridades.length) {
-          appendDayTitle("Prioridades de hoy");
-          appendItems(prioridades);
-        }
-        if (fechadasHoy.length) {
-          appendDayTitle("Fechadas para hoy");
-          appendItems(fechadasHoy);
-        }
-        if (vencidosHoy.length) {
-          appendDayTitle("Vencidos", "vencidos");
-          appendItems(vencidosHoy);
-        }
+        appendItems(prioridades);
+      }
+      if (fechadasHoy.length) {
+        appendHoyCollapsible(data, "Fechadas para hoy", fechadasHoy, "hoyFechadasAbiertas", "");
+      }
+      if (vencidosHoy.length) {
+        appendHoyCollapsible(data, "Vencidos", vencidosHoy, "hoyVencidosAbiertos", "vencidos");
       }
     } else if (buzonVista === "congelado") {
       var congItems = [];
