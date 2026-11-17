@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f285a" />
+  <meta name="theme-color" content="#f4f6fb" />
+  <meta name="color-scheme" content="light" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Instrumento" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
@@ -33,26 +34,7 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-top: env(safe-area-inset-top, 0px);
       --row-h: 48px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0b1220;
-        --surface: #152038;
-        --text: #e8eef8;
-        --muted: #9aa8c0;
-        --accent: #6ea8ff;
-        --accent-2: #3d7dd6;
-        --done-bg: #1b3d2a;
-        --done-text: #a8e6b8;
-        --border: #2a3854;
-        --tab-bg: #1a2740;
-        --tab-active: #3d7dd6;
-        --tab-active-text: #fff;
-        --switch-off: #3a4760;
-        --switch-on: #3cb371;
-        --btn-secondary: #1a2740;
-        --danger: #e57373;
-      }
+      color-scheme: light;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -876,21 +858,6 @@
       background: var(--accent-2);
       color: #fff;
     }
-    @media (prefers-color-scheme: dark) {
-      .aviso { background: #4a3b10; color: #ffe08a; }
-      .chip-leve { background: #4a3b10; color: #ffe08a; }
-      .chip-seria { background: #4a2a10; color: #ffc48a; }
-      .chip-grave { background: #4a181c; color: #ffb3b8; }
-      .chip-sobrecarga { background: #4a3210; color: #ffc56e; }
-      .row.cons-grave { background: #3a1c20; }
-      .chip-tipo { background: #2a3348; color: var(--text); }
-      .filtro-grav-1 { color: #ffe08a; }
-      .filtro-grav-2 { color: #ffc48a; }
-      .filtro-grav-3 { color: #ffb3b8; }
-      #gravFiltros button[data-grav="1"] { background: #4a3b10; color: #ffe08a; }
-      #gravFiltros button[data-grav="2"] { background: #4a2a10; color: #ffc48a; }
-      #gravFiltros button[data-grav="3"] { background: #4a181c; color: #ffb3b8; }
-    }
     .btn-completar-manana {
       width: 100%;
       height: 44px;
@@ -1113,9 +1080,6 @@
     .bitacora-tabla td.num {
       white-space: nowrap;
       text-align: right;
-    }
-    @media (prefers-color-scheme: dark) {
-      .ind-alerta { background: #4a3b10; color: #ffe08a; }
     }
     .hidden { display: none !important; }
   </style>
