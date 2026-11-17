@@ -1,5 +1,5 @@
-/* Instrumento diario — service worker v19 (network-first for HTML) */
-const CACHE = 'instrumento-diario-v19';
+/* Instrumento diario — service worker v20 (network-first for HTML) */
+const CACHE = 'instrumento-diario-v20';
 const ASSETS = [
   './',
   './index.html',

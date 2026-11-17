@@ -681,6 +681,15 @@
     .tipo-filtros {
       margin-top: 0;
     }
+    .filtro-grav-1 { color: #7a5b00; }
+    .filtro-grav-2 { color: #9a3b00; }
+    .filtro-grav-3 { color: #8b121c; }
+    #gravFiltros button[data-grav="1"] { background: #fff3cd; color: #7a5b00; }
+    #gravFiltros button[data-grav="2"] { background: #ffe0c2; color: #9a3b00; }
+    #gravFiltros button[data-grav="3"] { background: #f8d7da; color: #8b121c; }
+    #gravFiltros button[data-grav="1"] .filtro-nombre,
+    #gravFiltros button[data-grav="2"] .filtro-nombre,
+    #gravFiltros button[data-grav="3"] .filtro-nombre { color: inherit; }
     .chip-tipo { background: #e8eef8; color: var(--text); font-weight: 700; }
     .add-tipo-label {
       margin: 8px 0 4px;
@@ -875,6 +884,12 @@
       .chip-sobrecarga { background: #4a3210; color: #ffc56e; }
       .row.cons-grave { background: #3a1c20; }
       .chip-tipo { background: #2a3348; color: var(--text); }
+      .filtro-grav-1 { color: #ffe08a; }
+      .filtro-grav-2 { color: #ffc48a; }
+      .filtro-grav-3 { color: #ffb3b8; }
+      #gravFiltros button[data-grav="1"] { background: #4a3b10; color: #ffe08a; }
+      #gravFiltros button[data-grav="2"] { background: #4a2a10; color: #ffc48a; }
+      #gravFiltros button[data-grav="3"] { background: #4a181c; color: #ffb3b8; }
     }
     .btn-completar-manana {
       width: 100%;
@@ -1082,6 +1097,15 @@
           <button type="button" data-tipo="casa" aria-label="Filtrar por en la casa"><span class="filtro-icono">🏠</span><span class="filtro-nombre">Casa</span></button>
           <button type="button" data-tipo="computador" aria-label="Filtrar por computador"><span class="filtro-icono">💻</span><span class="filtro-nombre">Computador</span></button>
           <button type="button" data-tipo="telefono" aria-label="Filtrar por teléfono"><span class="filtro-icono">📞</span><span class="filtro-nombre">Teléfono</span></button>
+        </div>
+      </div>
+      <div class="filtro-grupo" id="filtroGravedad">
+        <p class="filtro-titulo">Gravedad</p>
+        <div class="meta-filtros grav-filtros" id="gravFiltros">
+          <button type="button" data-grav="0" aria-label="Filtrar por gravedad ninguna"><span class="filtro-icono filtro-grav-0">○</span><span class="filtro-nombre">Ninguna</span></button>
+          <button type="button" data-grav="1" aria-label="Filtrar por gravedad leve"><span class="filtro-icono filtro-grav-1">●</span><span class="filtro-nombre">Leve</span></button>
+          <button type="button" data-grav="2" aria-label="Filtrar por gravedad seria"><span class="filtro-icono filtro-grav-2">●</span><span class="filtro-nombre">Seria</span></button>
+          <button type="button" data-grav="3" aria-label="Filtrar por gravedad grave"><span class="filtro-icono filtro-grav-3">⚠️</span><span class="filtro-nombre">Grave</span></button>
         </div>
       </div>
       <p class="aviso hidden" id="buzonAviso" role="status"></p>
@@ -1338,6 +1362,7 @@
   var buzonVista = "hoy";
   var buzonMetaFiltro = "";
   var buzonTipoFiltro = "";
+  var buzonGravFiltro = "";
   var editingId = null;
   var buzonSobrecargaIds = {};
   var avisoTimer = null;
@@ -1577,7 +1602,8 @@
       deletedRecords: [],
       vista: "hoy",
       metaFiltro: "",
-      tipoFiltro: ""
+      tipoFiltro: "",
+      gravFiltro: ""
     };
   }
 
@@ -1659,6 +1685,11 @@
       data.metaFiltro = migrateMeta(data.metaFiltro);
       if (!metaValida(data.metaFiltro)) data.metaFiltro = "";
       if (!tipoValido(data.tipoFiltro)) data.tipoFiltro = "";
+      if (consecuenciaValida(Number(data.gravFiltro)) && data.gravFiltro !== "" && data.gravFiltro != null) {
+        data.gravFiltro = Number(data.gravFiltro);
+      } else {
+        data.gravFiltro = "";
+      }
       if (applyV16BuzonMigrations(data)) saveBuzon(data);
       return data;
     } catch (e) {
@@ -2385,8 +2416,17 @@
     return item.tipo === buzonTipoFiltro;
   }
 
+  function consecuenciaValida(n) {
+    return n === 0 || n === 1 || n === 2 || n === 3;
+  }
+
+  function matchesGravFiltro(item) {
+    if (!consecuenciaValida(buzonGravFiltro)) return true;
+    return consecuenciaDe(item) === buzonGravFiltro;
+  }
+
   function matchesFiltros(item) {
-    return matchesMetaFiltro(item) && matchesTipoFiltro(item);
+    return matchesMetaFiltro(item) && matchesTipoFiltro(item) && matchesGravFiltro(item);
   }
 
   function updateHorizonChrome(data) {
@@ -2423,6 +2463,13 @@
     var tchips = tipoFiltros ? tipoFiltros.querySelectorAll("button") : [];
     for (var t = 0; t < tchips.length; t++) {
       tchips[t].classList.toggle("active", tchips[t].getAttribute("data-tipo") === buzonTipoFiltro);
+    }
+    var grupoGrav = document.getElementById("filtroGravedad");
+    if (grupoGrav) grupoGrav.classList.toggle("hidden", buzonVista !== "completo" && buzonVista !== "agenda");
+    var gravFiltros = document.getElementById("gravFiltros");
+    var gchips = gravFiltros ? gravFiltros.querySelectorAll("button") : [];
+    for (var g = 0; g < gchips.length; g++) {
+      gchips[g].classList.toggle("active", consecuenciaValida(buzonGravFiltro) && Number(gchips[g].getAttribute("data-grav")) === buzonGravFiltro);
     }
   }
 
@@ -2471,6 +2518,16 @@
     buzonTipoFiltro = (buzonTipoFiltro === tipo) ? "" : tipo;
     var data = loadBuzon();
     data.tipoFiltro = buzonTipoFiltro;
+    saveBuzon(data);
+    renderBuzon();
+  }
+
+  function setGravFiltro(raw) {
+    var n = Number(raw);
+    if (!consecuenciaValida(n)) return;
+    buzonGravFiltro = (buzonGravFiltro === n) ? "" : n;
+    var data = loadBuzon();
+    data.gravFiltro = buzonGravFiltro;
     saveBuzon(data);
     renderBuzon();
   }
@@ -3711,6 +3768,7 @@
     if (metaValida(bInit.metaFiltro)) buzonMetaFiltro = bInit.metaFiltro;
     saveBuzon(bInit);
     if (tipoValido(bInit.tipoFiltro)) buzonTipoFiltro = bInit.tipoFiltro;
+    if (consecuenciaValida(bInit.gravFiltro)) buzonGravFiltro = bInit.gravFiltro;
     document.getElementById("fechaHoy").textContent = formatFechaES(dateKey);
     updateCounter(store, dateKey);
     renderList(store, dateKey);
@@ -3753,6 +3811,12 @@
       tipoFiltroBtns[tf].addEventListener("click", (function (btn) {
         return function () { setTipoFiltro(btn.getAttribute("data-tipo")); };
       })(tipoFiltroBtns[tf]));
+    }
+    var gravFiltroBtns = document.querySelectorAll("#gravFiltros button");
+    for (var gf = 0; gf < gravFiltroBtns.length; gf++) {
+      gravFiltroBtns[gf].addEventListener("click", (function (btn) {
+        return function () { setGravFiltro(btn.getAttribute("data-grav")); };
+      })(gravFiltroBtns[gf]));
     }
     function wireChoices(id, canClear) {
       var box = document.getElementById(id);
