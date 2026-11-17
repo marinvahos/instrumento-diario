@@ -966,7 +966,7 @@
     <header>
       <h1>Instrumento diario</h1>
       <p class="meta" id="fechaHoy"></p>
-      <p class="counter" id="contador">Llevas 0 de 16</p>
+      <p class="counter" id="contador">Llevas 0 de 30</p>
     </header>
 
     <div class="mode-tabs" role="tablist" aria-label="Vista">
@@ -976,7 +976,7 @@
     </div>
 
     <div id="viewDiario" class="view-diario">
-      <div class="tabs hidden" id="diarioTabs" role="tablist">
+      <div class="tabs" id="diarioTabs" role="tablist">
         <button type="button" class="active" data-group="0" role="tab" aria-selected="true">1 a 10</button>
         <button type="button" data-group="1" role="tab" aria-selected="false">11 a 20</button>
         <button type="button" data-group="2" role="tab" aria-selected="false">21 a 30</button>
@@ -1325,10 +1325,6 @@
   }
 
   function emptyDay() {
-    return emptyDayV13();
-  }
-
-  function emptyDayLegacy() {
     var tasks = {};
     for (var i = 1; i <= 30; i++) {
       tasks[String(i)] = { hecha: false, hora: null };
@@ -1336,34 +1332,79 @@
     return { tasks: tasks };
   }
 
-  function emptyDayV13() {
-    var tasks = {};
-    for (var i = 1; i <= TASKS_V13.length; i++) {
-      tasks[String(i)] = { hecha: false, hora: null };
-    }
-    return { tasks: tasks, schema: "v13" };
-  }
+  /* Correspondencias claras del esquema v13 (16 esenciales + cultivo) al de 30.
+     Índices v13 (1-22) → índices v12 (1-30). Vacío = sin equivalencia clara. */
+  var V13_A_V12 = {
+    1: [1, 2],
+    2: [3],
+    3: [4],
+    4: [6],
+    5: [7],
+    6: [8],
+    7: [9, 5],
+    8: [12],
+    9: [13],
+    10: [25],
+    11: [22],
+    12: [21],
+    13: [],
+    14: [28, 29],
+    15: [],
+    16: [30],
+    17: [17],
+    18: [16],
+    19: [18],
+    20: [20],
+    21: [15],
+    22: [26]
+  };
 
   function isV13Day(day) {
     return !!(day && day.schema === "v13");
   }
 
-  function tasksForDay(day) {
-    return isV13Day(day) ? TASKS_V13 : TASKS;
-  }
-
-  function emojisForDay(day) {
-    return isV13Day(day) ? TASK_EMOJIS_V13 : TASK_EMOJIS;
-  }
-
-  function dayHasAnyMark(day) {
-    if (!day || !day.tasks) return false;
-    var keys = Object.keys(day.tasks);
+  function migrateV13Day(day) {
+    if (!isV13Day(day)) return day;
+    var src = day.tasks || {};
+    var original = { schema: "v13", tasks: {} };
+    var keys = Object.keys(src);
     for (var i = 0; i < keys.length; i++) {
-      var t = day.tasks[keys[i]];
-      if (t && (t.hecha || t.hora)) return true;
+      var k = keys[i];
+      var t = src[k] || {};
+      original.tasks[k] = { hecha: !!t.hecha, hora: t.hora || null };
     }
-    return false;
+    var tasks = {};
+    for (var n = 1; n <= 30; n++) {
+      tasks[String(n)] = { hecha: false, hora: null };
+    }
+    for (var v = 1; v <= TASKS_V13.length; v++) {
+      var srcT = src[String(v)];
+      if (!srcT || !srcT.hecha) continue;
+      var dests = V13_A_V12[v] || [];
+      for (var d = 0; d < dests.length; d++) {
+        var slot = tasks[String(dests[d])];
+        slot.hecha = true;
+        if (!slot.hora && srcT.hora) slot.hora = srcT.hora;
+      }
+    }
+    var out = { tasks: tasks, v13Original: original };
+    var keep = Object.keys(day);
+    for (var j = 0; j < keep.length; j++) {
+      var key = keep[j];
+      if (key === "tasks" || key === "schema") continue;
+      if (out[key] === undefined) out[key] = day[key];
+    }
+    return out;
+  }
+
+  function migrateStoreDays(store) {
+    if (!store || !store.days) return store;
+    var dates = Object.keys(store.days);
+    for (var i = 0; i < dates.length; i++) {
+      var day = store.days[dates[i]];
+      if (isV13Day(day)) store.days[dates[i]] = migrateV13Day(day);
+    }
+    return store;
   }
 
   function loadStore() {
@@ -1373,6 +1414,7 @@
       var data = JSON.parse(raw);
       if (!data.days) data.days = {};
       if (!data.events) data.events = [];
+      migrateStoreDays(data);
       return data;
     } catch (e) {
       return { days: {}, events: [], lastDate: null };
@@ -1386,9 +1428,9 @@
   function ensureToday(store) {
     var key = todayKey();
     if (!store.days[key]) {
-      store.days[key] = emptyDayV13();
-    } else if (!isV13Day(store.days[key]) && !dayHasAnyMark(store.days[key])) {
-      store.days[key] = emptyDayV13();
+      store.days[key] = emptyDay();
+    } else if (isV13Day(store.days[key])) {
+      store.days[key] = migrateV13Day(store.days[key]);
     }
     store.lastDate = key;
     return key;
@@ -1616,14 +1658,11 @@
   }
 
   function estadoCelebracion(day) {
-    if (!isV13Day(day)) {
-      return { manana: false, tarde: false, noche: false, dia: false };
-    }
     return {
-      manana: rangoCompleto(day, 1, 7),
-      tarde: rangoCompleto(day, 8, 12),
-      noche: rangoCompleto(day, 13, 16),
-      dia: rangoCompleto(day, 1, 16)
+      g1: rangoCompleto(day, 1, 10),
+      g2: rangoCompleto(day, 11, 20),
+      g3: rangoCompleto(day, 21, 30),
+      dia: rangoCompleto(day, 1, 30)
     };
   }
 
@@ -1697,7 +1736,7 @@
     if (kind === "day") {
       var msg = document.createElement("div");
       msg.className = "celebra-msg";
-      msg.textContent = "¡16 de 16! Día completo";
+      msg.textContent = "¡30 de 30! Día completo";
       overlay.appendChild(msg);
     }
     if (!reduce) {
@@ -1731,7 +1770,7 @@
       celebrateDiario("day");
       return;
     }
-    if ((!before.manana && after.manana) || (!before.tarde && after.tarde) || (!before.noche && after.noche)) {
+    if ((!before.g1 && after.g1) || (!before.g2 && after.g2) || (!before.g3 && after.g3)) {
       celebrateDiario("block");
     }
   }
@@ -1757,16 +1796,12 @@
   }
 
   function countDone(day) {
-    var max = isV13Day(day) ? 16 : 30;
+    if (!day || !day.tasks) return 0;
     var n = 0;
-    for (var i = 1; i <= max; i++) {
+    for (var i = 1; i <= 30; i++) {
       if (day.tasks[String(i)] && day.tasks[String(i)].hecha) n++;
     }
     return n;
-  }
-
-  function diarioTotal(day) {
-    return isV13Day(day) ? 16 : 30;
   }
 
   function countBuzonDone(data) {
@@ -1798,14 +1833,14 @@
       var store = loadStore();
       var dateKey = ensureToday(store);
       var day = store.days[dateKey];
-      contador.textContent = "Llevas " + countDone(day) + " de " + diarioTotal(day);
+      contador.textContent = "Llevas " + countDone(day) + " de 30";
     }
   }
 
   function updateCounter(store, dateKey) {
     if (currentMode !== "diario") return;
     var day = store.days[dateKey];
-    document.getElementById("contador").textContent = "Llevas " + countDone(day) + " de " + diarioTotal(day);
+    document.getElementById("contador").textContent = "Llevas " + countDone(day) + " de 30";
   }
 
   function setMode(mode) {
@@ -1891,105 +1926,20 @@
     lista.innerHTML = "";
     var day = store.days[dateKey];
     var tabs = document.getElementById("diarioTabs");
-    if (isV13Day(day)) {
-      if (tabs) tabs.classList.add("hidden");
-      var names = TASKS_V13;
-      var emojis = TASK_EMOJIS_V13;
-      var btnM = document.createElement("button");
-      btnM.type = "button";
-      btnM.className = "btn-completar-manana";
-      btnM.id = "btnCompletarManana";
-      btnM.textContent = "Completar Mañana";
-      btnM.addEventListener("click", completarManana);
-      lista.appendChild(btnM);
-      appendBloque(lista, "Mañana");
-      for (var a = 1; a <= 7; a++) lista.appendChild(makeDiarioRow(day, a, names, emojis));
-      appendBloque(lista, "Tarde");
-      for (var b = 8; b <= 12; b++) lista.appendChild(makeDiarioRow(day, b, names, emojis));
-      appendBloque(lista, "Noche");
-      for (var c = 13; c <= 16; c++) lista.appendChild(makeDiarioRow(day, c, names, emojis));
-      var tog = document.createElement("button");
-      tog.type = "button";
-      tog.className = "cultivo-toggle" + (store.cultivoAbierto ? " open" : "");
-      tog.setAttribute("aria-expanded", store.cultivoAbierto ? "true" : "false");
-      tog.innerHTML = '<span>Cultivo y Vínculos (Opcional)</span><span class="chev">›</span>';
-      tog.addEventListener("click", function () {
-        var st = loadStore();
-        st.cultivoAbierto = !st.cultivoAbierto;
-        saveStore(st);
-        var key = ensureToday(st);
-        renderList(st, key);
-        updateCounter(st, key);
-      });
-      lista.appendChild(tog);
-      var body = document.createElement("div");
-      body.className = "cultivo-body" + (store.cultivoAbierto ? "" : " collapsed");
-      for (var d = 17; d <= 22; d++) body.appendChild(makeDiarioRow(day, d, names, emojis));
-      lista.appendChild(body);
-    } else {
-      if (tabs) tabs.classList.remove("hidden");
-      var avisoV = document.createElement("p");
-      avisoV.className = "hint-dia-viejo";
-      avisoV.textContent = "Este día se guardó con las 30 tareas anteriores. Desde mañana el diario tendrá 16 esenciales.";
-      lista.appendChild(avisoV);
-      var start = currentGroup * 10;
-      for (var i = 0; i < 10; i++) {
-        lista.appendChild(makeDiarioRow(day, start + i + 1, TASKS, TASK_EMOJIS));
-      }
+    if (tabs) tabs.classList.remove("hidden");
+    var start = currentGroup * 10;
+    for (var i = 0; i < 10; i++) {
+      lista.appendChild(makeDiarioRow(day, start + i + 1, TASKS, TASK_EMOJIS));
     }
-  }
-
-  function completarManana() {
-    var store = loadStore();
-    var dateKey = ensureToday(store);
-    var day = store.days[dateKey];
-    if (!isV13Day(day)) return;
-    var before = estadoCelebracion(day);
-    var hora = nowTime();
-    var marked = 0;
-    for (var n = 1; n <= 7; n++) {
-      var t = day.tasks[String(n)];
-      if (!t) {
-        t = { hecha: false, hora: null };
-        day.tasks[String(n)] = t;
-      }
-      if (t.hecha) continue;
-      t.hecha = true;
-      t.hora = hora;
-      store.events.push({
-        fecha: dateKey,
-        tarea_numero: n,
-        accion: "marcar",
-        hora: hora,
-        timestamp: new Date().toISOString()
-      });
-      marked++;
-    }
-    if (!marked) return;
-    saveStore(store);
-    for (var m = 1; m <= 7; m++) {
-      var row = document.querySelector('#lista .row[data-num="' + m + '"]');
-      if (row && day.tasks[String(m)] && day.tasks[String(m)].hecha) {
-        row.classList.add("done");
-        row.setAttribute("aria-pressed", "true");
-        burstStars(row);
-      }
-    }
-    var after = estadoCelebracion(day);
-    if (after.dia && !before.dia) {
-      maybeCelebrate(before, after);
-    } else if (after.manana && !before.manana) {
-      maybeCelebrate(before, after);
-    } else {
-      playMark();
-    }
-    updateCounter(store, dateKey);
   }
 
   function toggleTask(num) {
     var store = loadStore();
     var dateKey = ensureToday(store);
     var day = store.days[dateKey];
+    if (!day.tasks[String(num)]) {
+      day.tasks[String(num)] = { hecha: false, hora: null };
+    }
     var t = day.tasks[String(num)];
     var before = estadoCelebracion(day);
     var wasDone = !!t.hecha;
@@ -2011,7 +1961,7 @@
         row.setAttribute("aria-pressed", "true");
         burstStars(row);
         var after = estadoCelebracion(day);
-        if ((after.manana && !before.manana) || (after.tarde && !before.tarde) || (after.noche && !before.noche) || (after.dia && !before.dia)) {
+        if ((after.g1 && !before.g1) || (after.g2 && !before.g2) || (after.g3 && !before.g3) || (after.dia && !before.dia)) {
           maybeCelebrate(before, after);
         } else {
           playMark();
@@ -3206,16 +3156,31 @@
     for (var d = 0; d < dates.length; d++) {
       var fecha = dates[d];
       var day = store.days[fecha];
-      var names = tasksForDay(day);
-      for (var i = 1; i <= names.length; i++) {
+      if (isV13Day(day)) day = migrateV13Day(day);
+      for (var i = 1; i <= 30; i++) {
         var t = (day.tasks && day.tasks[String(i)]) || { hecha: false, hora: null };
         lines.push([
           csvEscape(fecha),
           csvEscape(i),
-          csvEscape(names[i - 1]),
+          csvEscape(TASKS[i - 1]),
           csvEscape(t.hecha ? "hecha" : "no hecha"),
           csvEscape(t.hora || "")
         ].join(","));
+      }
+      var backup = day.v13Original;
+      if (backup && backup.tasks) {
+        for (var v = 1; v <= TASKS_V13.length; v++) {
+          var dests = V13_A_V12[v] || [];
+          if (dests.length) continue;
+          var vt = backup.tasks[String(v)] || { hecha: false, hora: null };
+          lines.push([
+            csvEscape(fecha),
+            csvEscape("v13-" + v),
+            csvEscape(TASKS_V13[v - 1]),
+            csvEscape(vt.hecha ? "hecha" : "no hecha"),
+            csvEscape(vt.hora || "")
+          ].join(","));
+        }
       }
     }
     return "\uFEFF" + lines.join("\r\n");
@@ -3327,22 +3292,11 @@
 
   function cumplimientoDeDia(day) {
     if (!day || !day.tasks) return null;
-    if (isV13Day(day)) {
-      return countDone(day) / 16;
-    }
-    var n = 0;
-    var max = 30;
-    for (var i = 1; i <= max; i++) {
-      if (day.tasks[String(i)] && day.tasks[String(i)].hecha) n++;
-    }
-    return n / max;
+    return countDone(day) / 30;
   }
 
   function diaOrganizacion(day) {
     if (!day || !day.tasks) return false;
-    if (isV13Day(day)) {
-      return !!(day.tasks["10"] && day.tasks["10"].hecha);
-    }
     return !!(day.tasks["25"] && day.tasks["25"].hecha);
   }
 
@@ -3384,7 +3338,7 @@
     var com = countCerradasMeta(data, "compromisos", 7);
     var hog = countCerradasMeta(data, "hogar", 7);
     var bars = [
-      ["% Cumplimiento Diario (16 ítems)", pct + "%", Math.min(100, pct)],
+      ["% Cumplimiento Diario (30 ítems)", pct + "%", Math.min(100, pct)],
       ["Apuestas Escalables cerradas (meta 3/sem)", esc + " / 3", Math.min(100, Math.round((esc / 3) * 100))],
       ["Compromisos Actuales cerrados", String(com), Math.min(100, Math.round((com / 5) * 100))],
       ["Días de Organización Estructural", org + " de 7", Math.min(100, Math.round((org / 7) * 100))]
